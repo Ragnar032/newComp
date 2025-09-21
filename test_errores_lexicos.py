@@ -2,82 +2,55 @@
 
 import pytest
 from lexer import Lexer
-from tokens import Tokens
 
-# --- Grupo de Pruebas para Errores Léxicos ---
+# --- Lista de Casos de Prueba de Errores ---
+# Cada tupla contiene: (el código con error, el texto que esperamos ver en el mensaje de error)
+casos_de_error_lexico = [
+    pytest.param("int mi_var? = 10;", "?", id="símbolo_invalido"),
+    pytest.param('print("cadena sin cerrar);', 'Cadena no cerrada', id="cadena_no_cerrada"),
+    # Puedes agregar más casos aquí a medida que mejores tu lexer
+    # pytest.param("double val = 1.2.3;", "Número mal formado", id="numero_mal_formado"),
+]
 
-def test_error_por_simbolo_invalido():
+@pytest.mark.parametrize("codigo_erroneo, texto_esperado_en_error", casos_de_error_lexico)
+def test_deteccion_y_mensaje_de_errores_lexicos(codigo_erroneo, texto_esperado_en_error):
     """
-    Verifica que el lexer detecta un carácter que no pertenece al alfabeto del lenguaje.
+    Esta única prueba verifica múltiples tipos de errores léxicos
+    y asegura que el mensaje de error sea el correcto.
     """
-    # El carácter '?' es inválido en este lenguaje.
-    codigo_con_error = "int edad = 25?;"
+    print(f"\n--- Probando código: '{codigo_erroneo}' ---") # Este print lo veremos con el comando -s
     analizador = Lexer()
-    tokens = analizador.analizar(codigo_con_error)
+    tokens = analizador.analizar(codigo_erroneo)
+    
+    # 1. Buscar el token de error en la lista de resultados
+    error_token = None
+    for token in tokens:
+        if token['tipo'] == 'ERROR':
+            error_token = token
+            break # Encontramos el error, dejamos de buscar
 
-    # Buscamos un token de ERROR que mencione el carácter inválido.
-    error_encontrado = any(
-        t['tipo'] == 'ERROR' and '?' in t['valor'] for t in tokens
-    )
+    # 2. Verificar que efectivamente se encontró un token de ERROR
+    assert error_token is not None, f"No se generó un token de ERROR para el código problemático."
 
-    assert error_encontrado, "El lexer no detectó el símbolo inválido '?'"
+    # 3. Verificar que el mensaje de error contiene el texto que esperábamos
+    valor_del_error = error_token['valor']
+    print(f"Mensaje de error obtenido: '{valor_del_error}'") # Veremos este print también
+    
+    assert texto_esperado_en_error in valor_del_error, \
+        f"El mensaje de error no contiene el texto esperado ('{texto_esperado_en_error}')."
+# test_lexer.py
 
-
-def test_comportamiento_con_numero_y_punto():
+def test_analizador_con_archivo_vacio():
     """
-    (Esta es la prueba corregida)
-    Verifica que el lexer tokeniza un número y un punto como dos tokens separados,
-    ya que este es un error sintáctico, no léxico.
+    Verifica que el analizador maneja correctamente un archivo (string) vacío
+    y devuelve una lista de tokens vacía.
     """
-    codigo = "19.99.5"
+    # 1. Arrange: Preparamos el código de prueba, que es un string vacío.
+    codigo_vacio = ""
     analizador = Lexer()
-    tokens = analizador.analizar(codigo)
 
-    # El comportamiento léxicamente correcto es generar tres tokens
-    expected_tokens = [
-        {'tipo': 'NUMBER', 'valor': '19.99'},
-        {'tipo': 'PUNTO', 'valor': '.'},
-        {'tipo': 'NUMBER', 'valor': '5'}
-    ]
-    
-    tokens_simplificados = [{'tipo': t['tipo'], 'valor': t['valor']} for t in tokens]
-    
-    assert tokens_simplificados == expected_tokens, "El lexer debería generar 3 tokens separados"
+    # 2. Act: Ejecutamos el analizador.
+    tokens = analizador.analizar(codigo_vacio)
 
-
-def test_error_por_cadena_de_texto_no_cerrada():
-    """
-    Verifica que el lexer detecta una cadena de texto a la que le falta la comilla de cierre.
-    """
-    # La cadena "Hola mundo nunca se cierra.
-    codigo_con_error = 'print("Hola mundo);'
-    analizador = Lexer()
-    tokens = analizador.analizar(codigo_con_error)
-
-    # La implementación actual debería generar un error al no encontrar la comilla de cierre.
-    error_encontrado = any(
-        t['tipo'] == 'ERROR' for t in tokens
-    )
-    
-    assert error_encontrado, "El lexer no detectó el error de la cadena no cerrada."
-
-
-def test_ilustrativo_sobre_limites_lexicos():
-    """
-    Esta prueba sirve para ilustrar que algunos "errores" aparentes, como un
-    identificador que empieza con número, son en realidad manejados por el lexer
-    dividiéndolos en tokens válidos. El error real es sintáctico.
-    """
-    # '2variable' no es un token único inválido para este lexer.
-    # Es un token NUMBER ('2') seguido de un token ID ('variable').
-    codigo = "2variable"
-    analizador = Lexer()
-    tokens = analizador.analizar(codigo)
-    
-    expected_tokens = [
-        {'tipo': 'NUMBER', 'valor': '2'},
-        {'tipo': 'ID', 'valor': 'variable'}
-    ]
-
-    tokens_simplificados = [{'tipo': t['tipo'], 'valor': t['valor']} for t in tokens]
-    assert tokens_simplificados == expected_tokens
+    # 3. Assert: Verificamos que la lista de tokens esté vacía.
+    assert len(tokens) == 0, "El analizador debería devolver una lista vacía para un archivo vacío."

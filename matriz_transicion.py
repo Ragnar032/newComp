@@ -50,7 +50,7 @@ class MatrizTransicion:
         }
 
     def _obtener_columna(self, caracter):
-        if caracter.isalpha(): return 0
+        if caracter.isalpha() or caracter == '_': return 0 
         if caracter.isdigit(): return 1
         if caracter == '.': return 2
         if caracter == '"': return 3
@@ -75,6 +75,7 @@ class MatrizTransicion:
                 if codigo_fuente[pos] == '\n':
                     linea += 1
                 pos += 1
+                
             
             # Si después de saltar espacios llegamos al final, salimos del bucle principal
             if pos >= len(codigo_fuente):
@@ -104,6 +105,13 @@ class MatrizTransicion:
                     pos_ultimo_aceptacion = temp_pos + 1
                 
                 temp_pos += 1
+            
+
+            if estado_actual == 11 and temp_pos >= len(codigo_fuente):
+                tokens.append({'tipo': 'ERROR', 'valor': 'Cadena no cerrada', 'linea': linea})
+                pos = temp_pos 
+                continue
+
 
             if ultimo_estado_aceptacion == -1:
                 if not codigo_fuente[pos].isspace():
