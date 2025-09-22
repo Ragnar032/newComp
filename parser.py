@@ -26,9 +26,7 @@ class Parser:
             raise ParsingError(f"Se esperaba el token '{expected}', pero se encontró '{found}'")
 
 
-    # ==========================================================
-    #  INICIO DE LOS CAMBIOS: NUEVO PARSER DE EXPRESIONES
-    # ==========================================================
+ 
 
     def parse_expression(self):
         """
@@ -90,6 +88,9 @@ class Parser:
         elif token['tipo'] == 'ID':
             self.eat('ID')
             return {'tipo': 'Variable', 'nombre': token['valor']}
+        elif token['tipo'] == 'CADENA':
+            self.eat('CADENA')
+            return {'tipo': 'LiteralCadena', 'valor': token['valor']}
         elif token['tipo'] == 'PARENTESIS_IZQ':
             self.eat('PARENTESIS_IZQ')
             node = self.parse_expression() # Llama recursivamente a la regla de expresión
@@ -98,9 +99,7 @@ class Parser:
         else:
             raise ParsingError(f"Factor inesperado, no se puede empezar con '{token['tipo']}'")
 
-    # ==========================================================
-    #  FIN DE LOS CAMBIOS
-    # ==========================================================
+
 
     # --- El resto de las funciones (parse, parse_class_declaration, etc.)
     # --- se benefician de este cambio pero no necesitan ser modificadas por ahora.

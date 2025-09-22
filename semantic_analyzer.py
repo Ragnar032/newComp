@@ -1,39 +1,137 @@
 # semantic_analyzer.py
+from symbol_table import SymbolTable
 
+# NOTA: Creamos nuestra propia clase de Error para problemas de 'significado'.
+# Esto nos permite distinguirlos de los errores de 'sintaxis' (ParsingError).
 class SemanticError(Exception):
-    """
-    Una excepción personalizada para errores de significado o lógicos,
-    como variables no declaradas o tipos incompatibles.
-    """
     pass
 
 class SemanticAnalyzer:
     def __init__(self):
+        # Cada vez que se crea un analizador semántico, se le da su propia Tabla de Símbolos vacía.
+        self.symbol_table = SymbolTable()
+        
+        # NOTA: Aquí codificamos las reglas de tipo del lenguaje, basadas en nuestras propias tablas de tipos
+        # Es un diccionario anidado que funciona así: rules[operador][tipo_izq][tipo_der] -> tipo_resultado.
+        self.type_rules = {
+            'MAS': {
+                'int': {'int': 'int', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+                'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+            },
+            'MENOS': {
+                'int': {'int': 'int', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+                'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+            },
+            'POR': {
+                'int': {'int': 'int', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+                'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+            },
+            'DIV': {
+                # Según tus tablas, int / int da como resultado un 'real' (double en nuestro caso)
+                'int': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+                'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
+            },
+            'IGUALIGUAL': {
+                'int': {'int': 'boolean', 'double': 'boolean', 'String': 'error', 'boolean': 'error'},
+                'double': {'int': 'boolean', 'double': 'boolean', 'String': 'error', 'boolean': 'error'},
+                'String': {'String': 'boolean'}, # Asumiendo que se pueden comparar strings
+                'boolean': {'boolean': 'boolean'},
+            },
+        }
+
+    def visit(self, node):
         """
-        Inicializa el analizador. En el futuro, aquí se crearía
-        la Tabla de Símbolos para llevar un registro de las variables y funciones.
+        Este es el método "director" o "despachador".
+        Lee el 'tipo' del nodo del AST (ej. 'DeclaracionVariable') y llama a la función
+        visit_... correspondiente (ej. 'visit_DeclaracionVariable').
         """
-        # self.symbol_table = SymbolTable()
-        pass
+        method_name = f'visit_{node["tipo"]}'
+        # getattr busca un método en esta clase con el nombre que construimos.
+        # Si no lo encuentra, usa 'generic_visit' como plan B.
+        visitor = getattr(self, method_name, self.generic_visit)
+        return visitor(node)
+
+    def generic_visit(self, node):
+        """
+        Un visitador genérico que simplemente avanza el recorrido del árbol
+        hacia los nodos hijos, en caso de que un nodo no tenga un método 'visit_' específico.
+        """
+        for key, value in node.items():
+            if isinstance(value, dict):
+                self.visit(value)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        self.visit(item)
 
     def analyze(self, ast):
+        """Punto de entrada principal. Inicia el recorrido del AST desde la raíz."""
+        if ast:
+            self.visit(ast)
+
+    # --- Métodos Visitantes para Nodos Específicos del AST ---
+
+    def visit_DeclaracionVariable(self, node):
         """
-        PUNTO DE ENTRADA: Recibe el Árbol de Sintaxis Abstracta (AST) del parser
-        y lo recorre para aplicar las reglas semánticas del lenguaje.
+        Se llama cuando se encuentra un nodo de declaración de variable en el AST.
+        Aquí se validan las variables duplicadas y la asignación de tipos.
         """
-        # La primera regla semántica que verificamos es que la clase tenga un método 'main'.
-        # Esta es una regla de "significado", no de estructura.
-        if ast and ast['tipo'] == 'DeclaracionClase':
-            
-            # Buscamos en el cuerpo del AST de la clase si alguno de los miembros
-            # es una declaración de método con el nombre 'main'.
-            main_found = any(member.get('nombre') == 'main' for member in ast['cuerpo'])
-            
-            # Si, después de revisar todos los miembros, no se encontró el 'main', lanzamos un error.
-            if not main_found:
-                raise SemanticError("Error Semántico: No se encontró un método 'public static void main' en la clase.")
+        var_name = node['nombre']
+        var_type = node['tipo_dato']
         
-        # Aquí es donde se añadirían más comprobaciones en el futuro, como:
-        # - Verificar que no haya variables declaradas con el mismo nombre.
-        # - Asegurarse de que una variable se haya declarado antes de ser usada.
-        # - Comprobar que los tipos en una asignación sean compatibles (ej. no asignar un string a un int).
+        # REGLA 1: DETECCIÓN DE VARIABLE DUPLICADA
+        # Intentamos definir la variable en la tabla. Si define() devuelve False, es un duplicado.
+        if not self.symbol_table.define(var_name, var_type):
+            raise SemanticError(f"Error Semántico: La variable '{var_name}' ya ha sido declarada.")
+
+        # Ahora, necesitamos saber el tipo de la expresión que se le está asignando.
+        # Para ello, visitamos el nodo de la expresión (el valor).
+        expr_type = self.visit(node['valor'])
+        
+        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en asignación)
+        # Comparamos el tipo de la variable (ej. 'int') con el tipo de la expresión (ej. 'double').
+        if var_type != expr_type:
+            raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
+
+    def visit_Variable(self, node):
+        """
+        Se llama cuando se encuentra un nodo de uso de variable (ej. en el lado derecho de una expresión).
+        Aquí se validan las variables no declaradas.
+        """
+        var_name = node['nombre']
+        
+        # REGLA 2: DETECCIÓN DE VARIABLE NO DECLARADA
+        # Buscamos la variable en la tabla. Si lookup() devuelve None, no existe.
+        symbol = self.symbol_table.lookup(var_name)
+        if not symbol:
+            raise SemanticError(f"Error Semántico: La variable '{var_name}' no ha sido declarada.")
+        
+        # Si la variable existe, esta función devuelve su tipo para que otras funciones lo usen.
+        return symbol.type
+
+    def visit_ExpresionBinaria(self, node):
+        """
+        Se llama para un nodo de operación binaria (ej. 5 + x).
+        Aquí se valida la compatibilidad de tipos en las operaciones.
+        """
+        # Recursivamente, visitamos los nodos izquierdo y derecho para obtener sus tipos.
+        left_type = self.visit(node['izquierda'])
+        right_type = self.visit(node['derecha'])
+        op = node['operador']
+        
+        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en operaciones)
+        # Usamos nuestras 'type_rules' para ver si la operación es válida.
+        result_type = self.type_rules.get(op, {}).get(left_type, {}).get(right_type, 'error')
+        
+        # Si el resultado de la búsqueda es 'error', lanzamos la excepción.
+        if result_type == 'error':
+            raise SemanticError(f"Error Semántico: Operación inválida. No se puede aplicar el operador '{op}' a los tipos '{left_type}' y '{right_type}'.")
+            
+        # Si la operación es válida, esta función devuelve el tipo del resultado (ej. int + double -> double).
+        return result_type
+
+    def visit_LiteralNumerico(self, node):
+        """Determina si un número en el AST es 'int' o 'double'."""
+        if '.' in node['valor']:
+            return 'double'
+        return 'int'
