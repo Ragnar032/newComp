@@ -6,7 +6,30 @@ from parser import Parser, ParsingError
 from semantic_analyzer import SemanticAnalyzer, SemanticError
 
 
+
+#Variable Duplicada
 codigo_de_prueba = """
+public class MiClase {
+    public static void main(String[] args) {
+        int x = 5;
+        int x = 10; // Error aquí
+    }
+}
+"""
+"""
+#Variable No Declarada
+codigo_de_prueba = 
+public class MiClase {
+    public static void main(String[] args) {
+        int y = x; // Error aquí, 'x' no existe
+    }
+}
+"""
+
+
+"""
+#Incompatibilidad de Tipos
+codigo_de_prueba = 
 public class MiClase {
     public static void main(String[] args) {
         int z = 5 + "hola"; // Error aquí

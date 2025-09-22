@@ -75,16 +75,13 @@ class SemanticAnalyzer:
         var_type = node['tipo_dato']
         
         # REGLA 1: DETECCIÓN DE VARIABLE DUPLICADA
-        # Intentamos definir la variable en la tabla. Si define() devuelve False, es un duplicado.
         if not self.symbol_table.define(var_name, var_type):
             raise SemanticError(f"Error Semántico: La variable '{var_name}' ya ha sido declarada.")
 
-        # Ahora, necesitamos saber el tipo de la expresión que se le está asignando.
-        # Para ello, visitamos el nodo de la expresión (el valor).
         expr_type = self.visit(node['valor'])
         
         # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en asignación)
-        # Comparamos el tipo de la variable (ej. 'int') con el tipo de la expresión (ej. 'double').
+    
         if var_type != expr_type:
             raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
 
@@ -95,13 +92,10 @@ class SemanticAnalyzer:
         """
         var_name = node['nombre']
         
-        # REGLA 2: DETECCIÓN DE VARIABLE NO DECLARADA
-        # Buscamos la variable en la tabla. Si lookup() devuelve None, no existe.
         symbol = self.symbol_table.lookup(var_name)
         if not symbol:
             raise SemanticError(f"Error Semántico: La variable '{var_name}' no ha sido declarada.")
         
-        # Si la variable existe, esta función devuelve su tipo para que otras funciones lo usen.
         return symbol.type
 
     def visit_ExpresionBinaria(self, node):
@@ -109,20 +103,16 @@ class SemanticAnalyzer:
         Se llama para un nodo de operación binaria (ej. 5 + x).
         Aquí se valida la compatibilidad de tipos en las operaciones.
         """
-        # Recursivamente, visitamos los nodos izquierdo y derecho para obtener sus tipos.
         left_type = self.visit(node['izquierda'])
         right_type = self.visit(node['derecha'])
         op = node['operador']
         
-        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en operaciones)
-        # Usamos nuestras 'type_rules' para ver si la operación es válida.
+
         result_type = self.type_rules.get(op, {}).get(left_type, {}).get(right_type, 'error')
         
-        # Si el resultado de la búsqueda es 'error', lanzamos la excepción.
         if result_type == 'error':
             raise SemanticError(f"Error Semántico: Operación inválida. No se puede aplicar el operador '{op}' a los tipos '{left_type}' y '{right_type}'.")
             
-        # Si la operación es válida, esta función devuelve el tipo del resultado (ej. int + double -> double).
         return result_type
 
     def visit_LiteralNumerico(self, node):
