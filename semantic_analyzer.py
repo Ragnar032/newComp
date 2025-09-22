@@ -22,7 +22,6 @@ class SemanticAnalyzer:
                 'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
             },
             'DIV': {
-                
                 'int': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
                 'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
             },
@@ -35,11 +34,7 @@ class SemanticAnalyzer:
         }
 
     def visit(self, node):
-        """
-        Este es el método "director" o "despachador".
-        Lee el 'tipo' del nodo del AST (ej. 'DeclaracionVariable') y llama a la función
-        visit_... correspondiente (ej. 'visit_DeclaracionVariable').
-        """
+
         method_name = f'visit_{node["tipo"]}'
         # getattr busca un método en esta clase con el nombre que construimos.
         # Si no lo encuentra, usa 'generic_visit' como plan B.
@@ -64,7 +59,6 @@ class SemanticAnalyzer:
         if ast:
             self.visit(ast)
 
-    # --- Métodos Visitantes para Nodos Específicos del AST ---
 
     def visit_DeclaracionVariable(self, node):
         """
@@ -92,6 +86,7 @@ class SemanticAnalyzer:
         """
         var_name = node['nombre']
         
+        # REGLA 2: DETECCIÓN DE VARIABLE NO DECLARADA
         symbol = self.symbol_table.lookup(var_name)
         if not symbol:
             raise SemanticError(f"Error Semántico: La variable '{var_name}' no ha sido declarada.")
@@ -103,16 +98,20 @@ class SemanticAnalyzer:
         Se llama para un nodo de operación binaria (ej. 5 + x).
         Aquí se valida la compatibilidad de tipos en las operaciones.
         """
+        # Recursivamente, visitamos los nodos izquierdo y derecho para obtener sus tipos.
         left_type = self.visit(node['izquierda'])
         right_type = self.visit(node['derecha'])
         op = node['operador']
         
-
+        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en operaciones)
+        # Usamos nuestras 'type_rules' para ver si la operación es válida.
         result_type = self.type_rules.get(op, {}).get(left_type, {}).get(right_type, 'error')
         
+        # Si el resultado de la búsqueda es 'error', lanzamos la excepción.
         if result_type == 'error':
             raise SemanticError(f"Error Semántico: Operación inválida. No se puede aplicar el operador '{op}' a los tipos '{left_type}' y '{right_type}'.")
             
+        # Si la operación es válida, esta función devuelve el tipo del resultado (ej. int + double -> double).
         return result_type
 
     def visit_LiteralNumerico(self, node):
