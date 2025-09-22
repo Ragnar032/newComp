@@ -1,6 +1,5 @@
 # parser.py
 
-# ... (ParsingError, Parser, init, advance, eat se mantienen igual) ...
 class ParsingError(Exception):
     pass
 
@@ -33,17 +32,14 @@ class Parser:
         Analiza una expresión de suma y resta.
         BNF: <expresion> ::= <termino> | <expresion> "+" <termino> | <expresion> "-" <termino>
         """
-        # Comienza analizando el primer término
         node = self.parse_term()
 
-        # Mientras el siguiente token sea + o -, sigue construyendo el árbol de expresión
         while self.current_token['tipo'] in ['MAS', 'MENOS']:
             op_token = self.current_token
-            self.advance() # Consume el '+' o '-'
+            self.advance() 
             
             right_node = self.parse_term()
             
-            # Crea un nodo de operación binaria y lo asigna como el nuevo nodo principal
             node = {
                 'tipo': 'ExpresionBinaria',
                 'izquierda': node,
@@ -62,7 +58,7 @@ class Parser:
 
         while self.current_token['tipo'] in ['POR', 'DIV']:
             op_token = self.current_token
-            self.advance() # Consume el '*' o '/'
+            self.advance()
             
             right_node = self.parse_factor()
             
@@ -93,29 +89,22 @@ class Parser:
             return {'tipo': 'LiteralCadena', 'valor': token['valor']}
         elif token['tipo'] == 'PARENTESIS_IZQ':
             self.eat('PARENTESIS_IZQ')
-            node = self.parse_expression() # Llama recursivamente a la regla de expresión
+            node = self.parse_expression() 
             self.eat('PARENTESIS_DER')
             return node
         else:
             raise ParsingError(f"Factor inesperado, no se puede empezar con '{token['tipo']}'")
 
 
-
-    # --- El resto de las funciones (parse, parse_class_declaration, etc.)
-    # --- se benefician de este cambio pero no necesitan ser modificadas por ahora.
-    # --- (Se omiten por brevedad, pero deben permanecer en tu archivo)
     def parse(self):
         """
         PUNTO DE ENTRADA: Inicia el análisis y realiza validaciones finales.
         """
-        # Llama a la regla inicial de la gramática.
         ast = self.parse_class_declaration()
         
-        # Después de analizar la clase, no debería quedar nada más.
         if self.current_token['tipo'] != 'EOF':
             raise ParsingError(f"Caracteres inesperados ('{self.current_token['valor']}') después del final de la clase.")
         
-        # Verificación semántica final sobre el AST construido.
         main_found = any(member.get('nombre') == 'main' for member in ast['cuerpo'])
         if not main_found:
             raise ParsingError("Error Semántico: No se encontró un método 'public static void main' en la clase.")
@@ -162,7 +151,6 @@ class Parser:
         """
         self.eat('PUBLIC')
         
-        # Esta es una decisión de análisis predictivo: si vemos 'static', debe ser el 'main'.
         if self.current_token['tipo'] == 'STATIC':
             return self.parse_main_method_declaration()
         else:
@@ -199,7 +187,6 @@ class Parser:
         self.eat('ID')
         
         self.eat('PARENTESIS_IZQ')
-        # Aquí iría el análisis de parámetros
         self.eat('PARENTESIS_DER')
         
         method_body = self.parse_block_statement()

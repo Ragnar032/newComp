@@ -1,18 +1,13 @@
 # semantic_analyzer.py
 from symbol_table import SymbolTable
 
-# NOTA: Creamos nuestra propia clase de Error para problemas de 'significado'.
-# Esto nos permite distinguirlos de los errores de 'sintaxis' (ParsingError).
 class SemanticError(Exception):
     pass
 
 class SemanticAnalyzer:
     def __init__(self):
-        # Cada vez que se crea un analizador semántico, se le da su propia Tabla de Símbolos vacía.
         self.symbol_table = SymbolTable()
-        
-        # NOTA: Aquí codificamos las reglas de tipo del lenguaje, basadas en nuestras propias tablas de tipos
-        # Es un diccionario anidado que funciona así: rules[operador][tipo_izq][tipo_der] -> tipo_resultado.
+    
         self.type_rules = {
             'MAS': {
                 'int': {'int': 'int', 'double': 'double', 'String': 'error', 'boolean': 'error'},
@@ -27,14 +22,14 @@ class SemanticAnalyzer:
                 'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
             },
             'DIV': {
-                # Según tus tablas, int / int da como resultado un 'real' (double en nuestro caso)
+                
                 'int': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
                 'double': {'int': 'double', 'double': 'double', 'String': 'error', 'boolean': 'error'},
             },
             'IGUALIGUAL': {
                 'int': {'int': 'boolean', 'double': 'boolean', 'String': 'error', 'boolean': 'error'},
                 'double': {'int': 'boolean', 'double': 'boolean', 'String': 'error', 'boolean': 'error'},
-                'String': {'String': 'boolean'}, # Asumiendo que se pueden comparar strings
+                'String': {'String': 'boolean'}, 
                 'boolean': {'boolean': 'boolean'},
             },
         }

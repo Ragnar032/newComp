@@ -5,8 +5,7 @@ from lexer import Lexer
 from parser import Parser, ParsingError
 from semantic_analyzer import SemanticAnalyzer, SemanticError
 
-# --- CÓDIGO FUENTE A COMPILAR ---
-# Puedes cambiar este código para probar diferentes casos.
+
 codigo_de_prueba = """
 public class MiClase {
     public static void main(String[] args) {

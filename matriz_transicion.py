@@ -8,35 +8,34 @@ class MatrizTransicion:
         
         # Columnas: 0=L, 1=D, 2=., 3=", 4==, 5=!, 6=<, 7=>, 8=&, 9=|, 10=/, 11=*, 12=OpA, 13=Del, 14=WS, 15=Otro
         self.matriz = [
-        #    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-            [ 1,  2, 21, 11,  3,  4,  5,  6,  7,  8, 22, 13, 13, 14,  0, -1], # S0: Inicial
-            [ 1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S1: En ID
-            [-1,  2,  9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S2: En Número Entero
-            [-1, -1, -1, -1, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S3: Vio un =
-            [-1, -1, -1, -1, 16, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S4: Vio un !
-            [-1, -1, -1, -1, 17, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S5: Vio un <
-            [-1, -1, -1, -1, 18, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S6: Vio un >
-            [-1, -1, -1, -1, -1, -1, -1, -1, 19, -1, -1, -1, -1, -1, -1, -1], # S7: Vio un &
-            [-1, -1, -1, -1, -1, -1, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1], # S8: Vio un |
-            [-1, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S9: Vio un . después de un número
-            [-1, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S10: En Número Double
-            [11, 11, 11, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11], # S11: En Cadena
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S12: Aceptación CADENA
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S13: Aceptación Op. Aritméticos
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S14: Aceptación Delimitadores
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S15: Aceptación IGUALIGUAL
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S16: Aceptación DIFERENTE
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S17: Aceptación MENORIGUAL
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S18: Aceptación MAYORIGUAL
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S19: Aceptación AND
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S20: Aceptación OR
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S21: Aceptación PUNTO
-            # --- Nuevos estados para comentarios ---
-            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 23, 24, -1, -1, -1, -1], # S22: Vio una /
-            [23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23], # S23: En Comentario de línea (ignora todo hasta \n)
-            [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 25, 24, 24, 24, 24], # S24: En Comentario de bloque (ignora todo hasta *)
-            [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 26, 25, 24, 24, 24, 24], # S25: Vio un * dentro de comentario de bloque
-            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S26: Fin de comentario de bloque (después de */)
+          #    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+            [ 1,  2, 21, 11,  3,  4,  5,  6,  7,  8, 22, 13, 13, 14,  0, -1], # S0
+            [ 1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S1
+            [-1,  2,  9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S2
+            [-1, -1, -1, -1, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S3
+            [-1, -1, -1, -1, 16, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S4
+            [-1, -1, -1, -1, 17, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S5
+            [-1, -1, -1, -1, 18, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S6
+            [-1, -1, -1, -1, -1, -1, -1, -1, 19, -1, -1, -1, -1, -1, -1, -1], # S7
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1], # S8
+            [-1, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S9
+            [-1, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], # S10
+            [11, 11, 11, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11], # S11
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S12
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S13
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S14
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S15
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S16
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S17
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S18
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S19
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S20
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S21
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 23, 24, -1, -1, -1, -1], # S22
+            [23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23], # S23
+            [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 25, 24, 24, 24, 24], # S24
+            [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 26, 25, 24, 24, 24, 24], # S25
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # S26
         ]
         
         self.estados_aceptacion = {
@@ -77,7 +76,6 @@ class MatrizTransicion:
         pos = 0
         
         while pos < len(codigo_fuente):
-            # Salta espacios en blanco
             while pos < len(codigo_fuente) and codigo_fuente[pos].isspace():
                 if codigo_fuente[pos] == '\n':
                     linea += 1
@@ -99,12 +97,9 @@ class MatrizTransicion:
                 columna = self._obtener_columna(caracter)
                 proximo_estado = self.matriz[estado_actual][columna]
 
-                # --- Lógica para comentarios ---
-                # Si estamos en comentario de línea y llega un salto de línea, paramos.
                 if estado_actual == 23 and caracter == '\n':
                     proximo_estado = -1 # Forzamos la salida del bucle
                 
-                # Si estamos esperando el fin de un comentario de bloque y no es '/', volvemos a estado de comentario
                 if estado_actual == 25 and caracter != '/':
                     proximo_estado = 24
                 
@@ -120,23 +115,20 @@ class MatrizTransicion:
                 
                 temp_pos += 1
             
-            # --- Lógica para ignorar comentarios ---
-            if estado_actual == 23: # Si terminamos en comentario de línea
-                pos = temp_pos + 1 # Saltamos toda la línea incluyendo el \n
+            if estado_actual == 23:
+                pos = temp_pos + 1 
                 linea += lexema_actual.count('\n') + 1
                 continue
-            if estado_actual == 26: # Si terminamos en comentario de bloque
+            if estado_actual == 26: 
                 pos = temp_pos
                 linea += lexema_actual.count('\n')
                 continue
             
-            # --- Lógica para error de comentario de bloque no cerrado ---
             if estado_actual in [24, 25] and temp_pos >= len(codigo_fuente):
                  tokens.append({'tipo': 'ERROR', 'valor': 'Comentario de bloque no cerrado', 'linea': linea})
                  pos = temp_pos
                  continue
 
-            # (El resto de la función `analizar` se mantiene como en la versión anterior)
             if estado_actual == 11 and temp_pos >= len(codigo_fuente):
                 tokens.append({'tipo': 'ERROR', 'valor': 'Cadena no cerrada', 'linea': linea})
                 pos = temp_pos 
@@ -149,7 +141,7 @@ class MatrizTransicion:
                 continue
             
             lexema_final = codigo_fuente[pos:pos_ultimo_aceptacion]
-            linea += lexema_final.count('\n') # Actualiza el contador de líneas
+            linea += lexema_final.count('\n') 
             
             tipo_token = self.estados_aceptacion[ultimo_estado_aceptacion]
             
