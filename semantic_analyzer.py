@@ -80,7 +80,7 @@ class SemanticAnalyzer:
 
         expr_type = self.visit(node['valor'])
         
-        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en asignación)
+        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS
     
         if var_type != expr_type:
             raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
