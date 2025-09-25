@@ -1,13 +1,15 @@
 # semantic_analyzer.py
-from symbol_table import SymbolTable
+
+from variable_list import VariableList
 
 class SemanticError(Exception):
     pass
 
 class SemanticAnalyzer:
     def __init__(self):
-        self.symbol_table = SymbolTable()
-    
+        # CAMBIO 2: Crear una instancia de 'VariableList'
+        self.variable_list = VariableList()
+        
         self.type_rules = {
             'MAS': {
                 'int': {'int': 'int', 'double': 'double', 'String': 'error', 'boolean': 'error'},
@@ -34,10 +36,7 @@ class SemanticAnalyzer:
         }
 
     def visit(self, node):
-
         method_name = f'visit_{node["tipo"]}'
-        # getattr busca un método en esta clase con el nombre que construimos.
-        # Si no lo encuentra, usa 'generic_visit' como plan B.
         visitor = getattr(self, method_name, self.generic_visit)
         return visitor(node)
 
@@ -59,7 +58,6 @@ class SemanticAnalyzer:
         if ast:
             self.visit(ast)
 
-
     def visit_DeclaracionVariable(self, node):
         """
         Se llama cuando se encuentra un nodo de declaración de variable en el AST.
@@ -69,13 +67,13 @@ class SemanticAnalyzer:
         var_type = node['tipo_dato']
         
         # REGLA 1: DETECCIÓN DE VARIABLE DUPLICADA
-        if not self.symbol_table.define(var_name, var_type):
+        # CAMBIO 3: Usar el método 'add_variable' del objeto 'variable_list'
+        if not self.variable_list.add_variable(var_name, var_type):
             raise SemanticError(f"Error Semántico: La variable '{var_name}' ya ha sido declarada.")
 
         expr_type = self.visit(node['valor'])
         
         # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS
-    
         if var_type != expr_type:
             raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
 
@@ -87,31 +85,29 @@ class SemanticAnalyzer:
         var_name = node['nombre']
         
         # REGLA 2: DETECCIÓN DE VARIABLE NO DECLARADA
-        symbol = self.symbol_table.lookup(var_name)
-        if not symbol:
+        # CAMBIO 4: Usar el método 'find_variable' y guardar el resultado en 'variable'
+        variable = self.variable_list.find_variable(var_name)
+        if not variable:
             raise SemanticError(f"Error Semántico: La variable '{var_name}' no ha sido declarada.")
         
-        return symbol.type
+        # CAMBIO 5: Acceder al atributo '.tipo' del objeto 'Variable'
+        return variable.tipo
 
     def visit_ExpresionBinaria(self, node):
         """
         Se llama para un nodo de operación binaria (ej. 5 + x).
         Aquí se valida la compatibilidad de tipos en las operaciones.
         """
-        # Recursivamente, visitamos los nodos izquierdo y derecho para obtener sus tipos.
         left_type = self.visit(node['izquierda'])
         right_type = self.visit(node['derecha'])
         op = node['operador']
         
-        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS (en operaciones)
-        # Usamos nuestras 'type_rules' para ver si la operación es válida.
+        # REGLA 3: DETECCIÓN DE INCOMPATIBILIDAD DE TIPOS en operaciones
         result_type = self.type_rules.get(op, {}).get(left_type, {}).get(right_type, 'error')
         
-        # Si el resultado de la búsqueda es 'error', lanzamos la excepción.
         if result_type == 'error':
             raise SemanticError(f"Error Semántico: Operación inválida. No se puede aplicar el operador '{op}' a los tipos '{left_type}' y '{right_type}'.")
             
-        # Si la operación es válida, esta función devuelve el tipo del resultado (ej. int + double -> double).
         return result_type
 
     def visit_LiteralNumerico(self, node):
