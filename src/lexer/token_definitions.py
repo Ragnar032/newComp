@@ -1,4 +1,4 @@
-# tokens.py
+# src/lexer/token_definitions.py
 
 class Tokens:
     # Palabras reservadas

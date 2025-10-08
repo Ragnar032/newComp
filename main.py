@@ -1,13 +1,11 @@
 # main.py
 
 import json
-from lexer import Lexer
-from parser import Parser, ParsingError
-from semantic_analyzer import SemanticAnalyzer, SemanticError
+from src.lexer.lexer import Lexer
+from src.parser.parser import Parser, ParsingError
+from src.semantic.semantic import Semantic, SemanticError
 
-
-
-#Variable Duplicada
+# Variable Duplicada
 codigo_de_prueba = """
 public class MiClase {
     public static void main(String[] args) {
@@ -17,7 +15,7 @@ public class MiClase {
 }
 """
 """
-#Variable No Declarada
+# Variable No Declarada
 codigo_de_prueba = 
 public class MiClase {
     public static void main(String[] args) {
@@ -26,9 +24,8 @@ public class MiClase {
 }
 """
 
-
 """
-#Incompatibilidad de Tipos
+# Incompatibilidad de Tipos
 codigo_de_prueba = 
 public class MiClase {
     public static void main(String[] args) {
@@ -41,25 +38,21 @@ print("--- 1. FASE LÉXICA ---")
 analizador_lexico = Lexer()
 tokens = analizador_lexico.analizar(codigo_de_prueba)
 print("Tokens generados con éxito:")
-# Imprime la lista de tokens, uno por línea
 for token in tokens:
     print(token)
 
-# Bloque try-except para capturar errores de las fases de parsing y semántica
 try:
     print("\n--- 2. FASE SINTÁCTICA (Parsing) ---")
     analizador_sintactico = Parser(tokens)
     ast = analizador_sintactico.parse()
     print("AST construido con éxito.")
-    # Imprimimos el AST para ver el resultado del parser
     print(json.dumps(ast, indent=2))
 
     print("\n--- 3. FASE SEMÁNTICA ---")
-    analizador_semantico = SemanticAnalyzer()
+    analizador_semantico = Semantic()
     analizador_semantico.analyze(ast)
     
     print("\nAnálisis completado con éxito. El código es válido.")
 
 except (ParsingError, SemanticError) as e:
-    # Si ocurre un error sintáctico o semántico, se captura aquí
     print(f"\nERROR DETECTADO: {e}")

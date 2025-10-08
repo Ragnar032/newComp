@@ -1,0 +1,126 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+' ===================================
+' === Componentes del Compilador ===
+' ===================================
+
+class Main {
+  - lexer: Lexer
+  - parser: Parser
+  - semanticAnalyzer: SemanticAnalyzer
+  + compilar(codigo_fuente: string)
+}
+note left of Main
+  <b>Flujo de control:</b>
+  1. Llama a <b>lexer.analizar()</b> para obtener tokens.
+  2. Pasa los tokens al <b>parser.parse()</b> para crear el AST.
+  3. Pasa el AST al <b>semanticAnalyzer.analyze()</b>.
+end note
+
+class Lexer {
+  + analizar(codigo_fuente): list
+}
+
+class Parser {
+  - tokens: list
+  + parse(): DeclaracionClase
+}
+
+class SemanticAnalyzer {
+  - variable_list: VariableList
+  + analyze(arbol: DeclaracionClase)
+}
+
+' ========================================
+' === Estructura del AST (Basado en el código) ===
+' ========================================
+package "AST (Árbol Sintáctico Abstracto)" {
+  abstract class ASTNode
+
+  class DeclaracionClase extends ASTNode {
+    + nombre: string
+  }
+  DeclaracionClase "1" *-- "0..*" ASTNode : "cuerpo"
+
+  class DeclaracionMetodo extends ASTNode {
+    + nombre: string
+    + tipo_retorno: string
+  }
+  DeclaracionMetodo "1" *-- "0..*" ASTNode : "cuerpo"
+
+  class DeclaracionVariable extends ASTNode {
+    + tipo_dato: string
+    + nombre: string
+  }
+  DeclaracionVariable "1" *-- "1" ASTNode : "valor"
+  
+  class ExpresionBinaria extends ASTNode {
+    + operador: string
+  }
+  ExpresionBinaria "1" *-- "1" ASTNode : "izquierda"
+  ExpresionBinaria "1" *-- "1" ASTNode : "derecha"
+  
+  class LiteralNumerico extends ASTNode {
+    + valor: number
+  }
+
+  class LiteralCadena extends ASTNode {
+    + valor: string
+  }
+  
+  class Variable extends ASTNode {
+    + nombre: string
+  }
+
+  class LlamadaPrint extends ASTNode {
+  }
+  LlamadaPrint "1" *-- "1" ASTNode : "expresion"
+
+  class LlamadaFuncion extends ASTNode {
+    + nombre: string
+  }
+}
+
+' ===========================
+' === Clases de Soporte ===
+' ===========================
+class VariableList {
+  + add_variable(nombre, tipo)
+  + find_variable(nombre): Variable
+}
+class Variable {
+  + nombre: str
+  + tipo: str
+}
+class Tokens {
+  + {static} reservadas: dict
+}
+
+
+' =====================
+' === Relaciones ===
+' =====================
+
+' Main orquesta los componentes
+Main *-- Lexer
+Main *-- Parser
+Main *-- SemanticAnalyzer
+
+' El Parser CREA la estructura del AST
+Parser ..> ASTNode : "crea"
+
+' El Analizador Semántico USA/RECORRE la estructura del AST
+SemanticAnalyzer ..> ASTNode : "visita"
+
+' Composición interna
+SemanticAnalyzer o-- VariableList
+VariableList "1" *-- "0..*" Variable
+
+' Dependencias de utilidad
+Parser ..> Tokens : "usa"
+Lexer ..> Tokens : "usa"
+
+
+@enduml

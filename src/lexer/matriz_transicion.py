@@ -1,6 +1,6 @@
-# matriz_transicion.py
+# src/lexer/matriz_transicion.py
 
-from tokens import Tokens
+from .token_definitions import Tokens 
 
 class MatrizTransicion:
     def __init__(self):
@@ -92,13 +92,11 @@ class MatrizTransicion:
             while temp_pos < len(codigo_fuente):
                 caracter = codigo_fuente[temp_pos]
                 
-                # Para el contador de líneas, es mejor manejarlo después de tokenizar.
-                
                 columna = self._obtener_columna(caracter)
                 proximo_estado = self.matriz[estado_actual][columna]
 
                 if estado_actual == 23 and caracter == '\n':
-                    proximo_estado = -1 # Forzamos la salida del bucle
+                    proximo_estado = -1 
                 
                 if estado_actual == 25 and caracter != '/':
                     proximo_estado = 24
