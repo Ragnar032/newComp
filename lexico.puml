@@ -1,0 +1,56 @@
+@startuml
+title Proceso de Análisis Léxico
+
+start
+:main.py inicia el proceso;
+:Llama a `Lexer.analizar(codigo_fuente)`;
+
+partition Lexer {
+    :Llama a `MatrizTransicion.analizar(codigo_fuente)`;
+
+    partition MatrizTransicion {
+        :Inicializa lista de tokens vacía y `pos = 0`;
+        while (aún hay caracteres por leer?) is (sí)
+            :Ignora espacios en blanco (WS);
+            :Inicia bucle de reconocimiento en `pos` con `estado = 0`;
+            :Inicializa `ultimo_estado_aceptacion = -1`;
+            
+            while (hay más caracteres y estado != -1) is (sí)
+                :Lee el siguiente `caracter`;
+                :Llama a `_obtener_columna(caracter)`;
+                :Consulta `matriz[estado][columna]` para obtener `proximo_estado`;
+                if (`proximo_estado` es válido?) then (sí)
+                    :Avanza al `proximo_estado`;
+                    if (`proximo_estado` es de aceptación?) then (sí)
+                        :Guarda el `proximo_estado` y la posición actual;
+                    endif
+                else (no)
+                    :Rompe el bucle de reconocimiento;
+                endif
+            endwhile
+            
+            if (se encontró un `ultimo_estado_aceptacion`?) then (sí)
+                :Crea el lexema usando la posición guardada;
+                :Obtiene el `tipo_token` del estado de aceptación;
+                
+                if (`tipo_token` es 'ID'?) then (sí)
+                    if (lexema es una palabra reservada?) then (sí)
+                        :Actualiza `tipo_token` al tipo de la palabra reservada;
+                    endif
+                endif
+                
+                :Crea el diccionario del token;
+                :Añade el token a la lista;
+                :Actualiza `pos` a la posición final del lexema;
+            else (no)
+                :Crea un token de TIPO_ERROR;
+                :Añade el token de error a la lista;
+                :Avanza `pos` en 1;
+            endif
+        endwhile
+    }
+    :Retorna la `lista de tokens`;
+}
+:main.py recibe la `lista de tokens`;
+stop
+@enduml

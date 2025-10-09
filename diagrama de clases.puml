@@ -1,0 +1,113 @@
+@startuml
+title Diagrama de Clases Completo del Compilador
+
+' --- Paquete LEXER ---
+package "src.lexer" {
+  class Lexer {
+    - motor_matriz: MatrizTransicion
+    + __init__()
+    + analizar(codigo_fuente): list
+  }
+  
+  class MatrizTransicion {
+    - matriz: list
+    - estados_aceptacion: dict
+    - reservadas: dict
+    + __init__()
+    + analizar(codigo_fuente): list
+    #_obtener_columna(caracter): int
+  }
+  
+  class Tokens {
+    + {static} reservadas: dict
+    + {static} tokens: list
+  }
+  
+  Lexer o-- MatrizTransicion
+  MatrizTransicion ..> Tokens : usa
+}
+
+
+' --- Paquete PARSER ---
+package "src.parser" {
+  class Parser extends GrammarRules {
+    + parse(): dict
+  }
+  
+  class GrammarRules extends ParserAuxiliaries {
+    + parse_class_declaration()
+    + parse_member_declaration()
+    + parse_method_declaration()
+    + parse_main_method_declaration()
+    + parse_generic_method_declaration()
+    + parse_block_statement()
+    + parse_statement()
+    + parse_print_statement()
+    + parse_function_call()
+    + parse_variable_declaration()
+    + parse_expression()
+    + parse_term()
+    + parse_factor()
+  }
+  
+  class ParserAuxiliaries {
+    # tokens: list
+    # pos: int
+    # current_token: dict
+    + __init__(tokens)
+    + advance()
+    + eat(token_type)
+  }
+  
+  class ParsingError extends Exception
+  GrammarRules ..> ParsingError : lanza
+}
+
+
+' --- Paquete SEMANTIC ---
+package "src.semantic" {
+  class Semantic {
+    - variable_list: VariableList
+    - type_rules: dict
+    + __init__()
+    + analyze(ast: dict)
+    + visit(node)
+    # generic_visit(node)
+    # visit_DeclaracionVariable(node)
+    # visit_Variable(node)
+    # visit_ExpresionBinaria(node)
+    # visit_LiteralNumerico(node)
+    # visit_LiteralCadena(node)
+  }
+  
+  class VariableList {
+    - variables: dict
+    + __init__()
+    + add_variable(nombre, tipo): bool
+    + find_variable(nombre): Variable
+  }
+  
+  class Variable {
+    + nombre: str
+    + tipo: str
+    + __init__(nombre, tipo)
+  }
+  
+  class SemanticError extends Exception
+  Semantic ..> SemanticError : lanza
+  
+  Semantic o-- VariableList
+  VariableList "1" *-- "0..*" Variable
+}
+
+
+' --- Orquestación Principal ---
+class Main {
+  + main()
+}
+Main ..> Lexer : crea y usa
+Main ..> Parser : crea y usa
+Main ..> Semantic : crea y usa
+
+
+@enduml
