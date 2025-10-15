@@ -1,56 +1,73 @@
 @startuml
-title Proceso de Análisis Léxico
+title Diagrama de Flujo Detallado del Analizador Semántico
 
 start
-:main.py inicia el proceso;
-:Llama a `Lexer.analizar(codigo_fuente)`;
+:Recibir el Árbol de Sintaxis Abstracto (AST) del Parser;
+:Iniciar el recorrido con **analyze(AST)**;
+note right: El método 'visit(nodo)' actuará como despachador
 
-partition Lexer {
-    :Llama a `MatrizTransicion.analizar(codigo_fuente)`;
+:visit() despacha a **visit_DeclaracionVariable** para "int y = x + 5";
+:Extraer nombre ("y") y tipo ("int") del nodo;
+:Llamar a **variable_list.add_variable("y", "int")**;
 
-    partition MatrizTransicion {
-        :Inicializa lista de tokens vacía y `pos = 0`;
-        while (aún hay caracteres por leer?) is (sí)
-            :Ignora espacios en blanco (WS);
-            :Inicia bucle de reconocimiento en `pos` con `estado = 0`;
-            :Inicializa `ultimo_estado_aceptacion = -1`;
-            
-            while (hay más caracteres y estado != -1) is (sí)
-                :Lee el siguiente `caracter`;
-                :Llama a `_obtener_columna(caracter)`;
-                :Consulta `matriz[estado][columna]` para obtener `proximo_estado`;
-                if (`proximo_estado` es válido?) then (sí)
-                    :Avanza al `proximo_estado`;
-                    if (`proximo_estado` es de aceptación?) then (sí)
-                        :Guarda el `proximo_estado` y la posición actual;
-                    endif
-                else (no)
-                    :Rompe el bucle de reconocimiento;
-                endif
-            endwhile
-            
-            if (se encontró un `ultimo_estado_aceptacion`?) then (sí)
-                :Crea el lexema usando la posición guardada;
-                :Obtiene el `tipo_token` del estado de aceptación;
-                
-                if (`tipo_token` es 'ID'?) then (sí)
-                    if (lexema es una palabra reservada?) then (sí)
-                        :Actualiza `tipo_token` al tipo de la palabra reservada;
-                    endif
-                endif
-                
-                :Crea el diccionario del token;
-                :Añade el token a la lista;
-                :Actualiza `pos` a la posición final del lexema;
-            else (no)
-                :Crea un token de TIPO_ERROR;
-                :Añade el token de error a la lista;
-                :Avanza `pos` en 1;
-            endif
-        endwhile
-    }
-    :Retorna la `lista de tokens`;
-}
-:main.py recibe la `lista de tokens`;
+if (La variable "y" ya existe en la Tabla de Símbolos?) then (sí)
+    :Lanzar **SemanticError**: Variable Duplicada;
+    goto error_state
+else (no)
+    :Continuar;
+endif
+
+note right: Ahora se debe validar la expresión a la derecha del '='.
+
+:Llamar a **visit(nodo_expresion)** para "x + 5";
+:visit() despacha a **visit_ExpresionBinaria** (operador "+");
+
+:Llamar a **visit(hijo_izquierdo)** para "x";
+:visit() despacha a **visit_Variable**;
+:Llamar a **variable_list.find_variable("x")**;
+
+if ("x" no se encuentra en la Tabla de Símbolos?) then (sí)
+    :Lanzar **SemanticError**: Variable No Declarada;
+    goto error_state
+else (no)
+    :Retornar el tipo de "x" (ej: "int");
+endif
+
+:Llamar a **visit(hijo_derecho)** para "5";
+:visit() despacha a **visit_LiteralNumerico**;
+:Determinar el tipo del literal (ej: "int");
+:Retornar "int";
+
+:Consultar matriz **type_rules['MAS']['int']['int']**;
+
+if (La combinación de tipos da como resultado "error"?) then (sí)
+    :Lanzar **SemanticError**: Tipos Incompatibles en Operación;
+    goto error_state
+else (no)
+    :Retornar el tipo resultante de la operación (ej: "int");
+endif
+
+note right: Vuelve el control a visit_DeclaracionVariable
+
+:Comparar tipo declarado ("int") con tipo de la expresión ("int");
+
+if (Los tipos son incompatibles para la asignación?) then (sí)
+    :Lanzar **SemanticError**: Tipos Incompatibles en Asignación;
+    goto error_state
+else (no)
+    :La declaración de la variable "y" es semánticamente correcta;
+endif
+
+:Continuar visitando el resto de sentencias del AST;
+if (Se llegó al final del árbol sin errores?) then (sí)
+    :Análisis Semántico Completado con Éxito;
+    stop
+else (no)
+    goto error_state
+endif
+
+label error_state
+:Reportar el error semántico al usuario;
 stop
+
 @enduml

@@ -3,8 +3,6 @@
 from .parser_auxiliaries import ParserAuxiliaries, ParsingError
 
 class GrammarRules(ParserAuxiliaries):
-    """Contiene todos los métodos para analizar las reglas gramaticales."""
-
     def parse_class_declaration(self):
         """
         BNF: <class_declaration> ::= PUBLIC CLASS ID '{' (<member_declaration>)* '}'
@@ -93,20 +91,68 @@ class GrammarRules(ParserAuxiliaries):
 
     def parse_statement(self):
         """
-        BNF: <statement> ::= <variable_declaration> | <print_statement> | <if_statement> | <function_call>
+        BNF: <statement> ::= <variable_declaration> | <assignment_statement> | <print_statement> | 
+                             <if_statement> | <while_statement> | <for_statement> | <function_call>
         """
+        token_type = self.current_token['tipo']
+        
         data_types = ['INT', 'DOUBLE', 'BOOLEAN', 'STRINGTYPE']
-        if self.current_token['tipo'] in data_types:
+        if token_type in data_types:
             return self.parse_variable_declaration()
-        elif self.current_token['tipo'] == 'PRINT':
+        elif token_type == 'PRINT':
             return self.parse_print_statement()
-        elif self.current_token['tipo'] == 'IF':
+        elif token_type == 'IF':
             return self.parse_if_statement()
-        elif self.current_token['tipo'] == 'ID' and self.tokens[self.pos + 1]['tipo'] == 'PARENTESIS_IZQ':
+        elif token_type == 'WHILE':
+            return self.parse_while_statement()
+        elif token_type == 'FOR':
+            return self.parse_for_statement()
+        elif token_type == 'ID' and self.peek()['tipo'] == 'IGUAL':
+            return self.parse_assignment_statement()
+        elif token_type == 'ID' and self.peek()['tipo'] == 'PARENTESIS_IZQ':
             return self.parse_function_call()
         else:
-            raise ParsingError(f"Sentencia no reconocida, no puede empezar con '{self.current_token['tipo']}'")
+            raise ParsingError(f"Sentencia no reconocida, no puede empezar con '{token_type}'")
     
+    def parse_while_statement(self):
+        """
+        BNF: <while_statement> ::= WHILE '(' <expression> ')' <block_statement>
+        """
+        self.eat('WHILE')
+        self.eat('PARENTESIS_IZQ')
+        condicion = self.parse_expression()
+        self.eat('PARENTESIS_DER')
+        
+        cuerpo = self.parse_block_statement()
+        
+        return {'tipo': 'DeclaracionWhile', 'condicion': condicion, 'cuerpo': cuerpo}
+    
+    def parse_for_statement(self):
+        """
+        BNF: <for_statement> ::= FOR '(' <variable_declaration_no_semicolon> ';' <expression> ';' <assignment_expression> ')' <block_statement>
+        """
+        self.eat('FOR')
+        self.eat('PARENTESIS_IZQ')
+        
+        inicializador = self.parse_variable_declaration(consume_semicolon=False)
+        self.eat('PUNTOCOMA')
+        
+        condicion = self.parse_expression()
+        self.eat('PUNTOCOMA')
+        
+        incremento = self.parse_assignment_expression()
+        self.eat('PARENTESIS_DER')
+        
+        cuerpo = self.parse_block_statement()
+        
+        return {
+            'tipo': 'DeclaracionFor',
+            'inicializador': inicializador,
+            'condicion': condicion,
+            'incremento': incremento,
+            'cuerpo': cuerpo
+        }
+
     def parse_if_statement(self):
         """
         BNF: <if_statement> ::= IF '(' <expression> ')' <block_statement> [ ELSE <block_statement> ]
@@ -136,6 +182,14 @@ class GrammarRules(ParserAuxiliaries):
         self.eat('PUNTOCOMA')
         return {'tipo': 'LlamadaPrint', 'expresion': expression}
     
+    def parse_assignment_statement(self):
+        """
+        BNF: <assignment_statement> ::= ID '=' <expression> ';'
+        """
+        assignment_node = self.parse_assignment_expression()
+        self.eat('PUNTOCOMA')
+        return assignment_node
+
     def parse_function_call(self):
         """
         BNF: <function_call> ::= ID '(' ')' ';'
@@ -147,9 +201,9 @@ class GrammarRules(ParserAuxiliaries):
         self.eat('PUNTOCOMA')
         return {'tipo': 'LlamadaFuncion', 'nombre': function_name}
 
-    def parse_variable_declaration(self):
+    def parse_variable_declaration(self, consume_semicolon=True):
         """
-        BNF: <variable_declaration> ::= <type> ID '=' <expression> ';'
+        BNF: <variable_declaration> ::= <type> ID '=' <expression> [';']
         """
         data_type = self.current_token
         self.advance()
@@ -157,8 +211,21 @@ class GrammarRules(ParserAuxiliaries):
         self.eat('ID')
         self.eat('IGUAL')
         value = self.parse_expression()
-        self.eat('PUNTOCOMA')
+        
+        if consume_semicolon:
+            self.eat('PUNTOCOMA')
+        
         return {'tipo': 'DeclaracionVariable', 'tipo_dato': data_type['valor'], 'nombre': variable_name['valor'], 'valor': value}
+
+    def parse_assignment_expression(self):
+        """
+        Parsea una expresión de asignación como 'ID = <expresion>' sin el punto y coma final.
+        """
+        variable_name = self.current_token['valor']
+        self.eat('ID')
+        self.eat('IGUAL')
+        value = self.parse_expression()
+        return {'tipo': 'Asignacion', 'variable': variable_name, 'valor': value}
 
     def parse_expression(self):
         """

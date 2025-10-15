@@ -10,7 +10,7 @@ codigo_de_prueba = """
 public class MiClase {
     public static void main(String[] args) {
         int x = 5;
-        int x = 10; // Error aquí
+        int y = x+z; // Error aquí
     }
 }
 """
@@ -23,8 +23,8 @@ public class MiClase {
     }
 }
 """
-
 """
+
 # Incompatibilidad de Tipos
 codigo_de_prueba = 
 public class MiClase {
