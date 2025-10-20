@@ -15,7 +15,15 @@ class ParserAuxiliaries:
             self.current_token = self.tokens[self.pos]
         else:
             self.current_token = {'tipo': 'EOF', 'valor': None}
-    
+
+    def peek(self):
+            peek_pos = self.pos + 1
+            if peek_pos < len(self.tokens):
+                return self.tokens[peek_pos]
+            else:
+                # Si no hay más tokens, devuelve EOF para evitar errores
+                return {'tipo': 'EOF', 'valor': None}
+        
     def eat(self, token_type):
         if self.current_token and self.current_token['tipo'] == token_type:
             self.advance()

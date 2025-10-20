@@ -7,10 +7,9 @@ from src.semantic.semantic import Semantic, SemanticError
 
 # Variable Duplicada
 codigo_de_prueba = """
-public class MiClase {
+public class Main {
     public static void main(String[] args) {
-        int x = 5;
-        int y = x+z; // Error aquí
+        int resultado = 10 + "hola";
     }
 }
 """
