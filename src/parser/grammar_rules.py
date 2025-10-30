@@ -201,59 +201,98 @@ class GrammarRules(ParserAuxiliaries):
         self.eat('PUNTOCOMA')
         return {'tipo': 'LlamadaFuncion', 'nombre': function_name}
 
+    # --- INICIO DE MÉTODOS REFACTORIZADOS ---
+
     def parse_variable_declaration(self, consume_semicolon=True):
         """
         BNF: <variable_declaration> ::= <type> ID '=' <expression> [';']
         """
         data_type = self.current_token
-        self.advance()
-        variable_name = self.current_token
-        self.eat('ID')
-        self.eat('IGUAL')
-        value = self.parse_expression()
+        self.advance() # Avanza después de consumir el tipo de dato
+        
+        # Llama al método auxiliar para la parte 'ID = <expression>'
+        variable_name, value = self._parse_assignment_rhs()
         
         if consume_semicolon:
             self.eat('PUNTOCOMA')
         
-        return {'tipo': 'DeclaracionVariable', 'tipo_dato': data_type['valor'], 'nombre': variable_name['valor'], 'valor': value}
+        return {'tipo': 'DeclaracionVariable', 'tipo_dato': data_type['valor'], 'nombre': variable_name, 'valor': value}
 
     def parse_assignment_expression(self):
         """
         Parsea una expresión de asignación como 'ID = <expresion>' sin el punto y coma final.
         """
+        # Llama al método auxiliar para la parte 'ID = <expression>'
+        variable_name, value = self._parse_assignment_rhs()
+        
+        return {'tipo': 'Asignacion', 'variable': variable_name, 'valor': value}
+
+    def _parse_assignment_rhs(self):
+        """
+        Método auxiliar para parsear la parte derecha de una asignación.
+        Consume: ID '=' <expression>
+        Retorna: (nombre_variable, nodo_valor)
+        """
         variable_name = self.current_token['valor']
         self.eat('ID')
         self.eat('IGUAL')
         value = self.parse_expression()
-        return {'tipo': 'Asignacion', 'variable': variable_name, 'valor': value}
+        return variable_name, value
 
     def parse_expression(self):
         """
-        BNF: <expression> ::= <term> ( (PLUS | MINUS) <term> )*
+        BNF: <expression> ::= <comparison> ( (IGUALIGUAL | DIFERENTE) <comparison> )*
         """
-        node = self.parse_term()
+        node = self.parse_comparison()
+        while self.current_token['tipo'] in ['IGUALIGUAL', 'DIFERENTE']:
+            op_token = self.current_token
+            self.advance()
+            right_node = self.parse_comparison()
+            node = {'tipo': 'ExpresionBinaria', 'izquierda': node, 'operador': op_token['tipo'], 'derecha': right_node}
+        return node
+
+    def parse_comparison(self):
+        """
+        BNF: <comparison> ::= <additive_expression> ( (MENOR | MENORIGUAL | MAYOR | MAYORIGUAL) <additive_expression> )*
+        """
+        node = self.parse_additive_expression()
+        while self.current_token['tipo'] in ['MENOR', 'MENORIGUAL', 'MAYOR', 'MAYORIGUAL']:
+            op_token = self.current_token
+            self.advance()
+            right_node = self.parse_additive_expression()
+            node = {'tipo': 'ExpresionBinaria', 'izquierda': node, 'operador': op_token['tipo'], 'derecha': right_node}
+        return node
+
+    def parse_additive_expression(self):
+        """
+        BNF: <additive_expression> ::= <multiplicative_expression> ( (MAS | MENOS) <multiplicative_expression> )*
+        (Esta era tu antigua parse_expression)
+        """
+        node = self.parse_multiplicative_expression()
         while self.current_token['tipo'] in ['MAS', 'MENOS']:
             op_token = self.current_token
             self.advance()
-            right_node = self.parse_term()
+            right_node = self.parse_multiplicative_expression()
             node = {'tipo': 'ExpresionBinaria', 'izquierda': node, 'operador': op_token['tipo'], 'derecha': right_node}
         return node
 
-    def parse_term(self):
+    def parse_multiplicative_expression(self):
         """
-        BNF: <term> ::= <factor> ( (MUL | DIV) <factor> )*
+        BNF: <multiplicative_expression> ::= <primary> ( (POR | DIV) <primary> )*
+        (Esta era tu antigua parse_term)
         """
-        node = self.parse_factor()
+        node = self.parse_primary()
         while self.current_token['tipo'] in ['POR', 'DIV']:
             op_token = self.current_token
             self.advance()
-            right_node = self.parse_factor()
+            right_node = self.parse_primary()
             node = {'tipo': 'ExpresionBinaria', 'izquierda': node, 'operador': op_token['tipo'], 'derecha': right_node}
         return node
 
-    def parse_factor(self):
+    def parse_primary(self):
         """
-        BNF: <factor> ::= NUMBER | ID | STRING | '(' <expression> ')'
+        BNF: <primary> ::= NUMBER | ID | STRING | '(' <expression> ')' | TRUE | FALSE
+        (Esta era tu antigua parse_factor)
         """
         token = self.current_token
         if token['tipo'] == 'NUMBER':
@@ -265,9 +304,12 @@ class GrammarRules(ParserAuxiliaries):
         elif token['tipo'] == 'CADENA':
             self.eat('CADENA')
             return {'tipo': 'LiteralCadena', 'valor': token['valor']}
+        elif token['tipo'] in ['TRUE', 'FALSE']:
+            self.advance() 
+            return {'tipo': 'LiteralBooleano', 'valor': token['valor']}
         elif token['tipo'] == 'PARENTESIS_IZQ':
             self.eat('PARENTESIS_IZQ')
-            node = self.parse_expression()
+            node = self.parse_expression() # Llama a la nueva expresión de nivel superior
             self.eat('PARENTESIS_DER')
             return node
         else:

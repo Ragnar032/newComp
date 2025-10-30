@@ -1,57 +1,55 @@
-# main.py
+# main.py (Limpio, sin TAC/Cuádruplos)
 
-import json
 from src.lexer.lexer import Lexer
-from src.parser.parser import Parser, ParsingError
-from src.semantic.semantic import Semantic, SemanticError
+from src.parser.parser import Parser
+from src.semantic.semantic_stack import SemanticStack
+from src.postfix_visitor import FullPostfixVisitor # <- Importa el visitante
+from src.parser.parser_auxiliaries import ParsingError
+from src.semantic.semantic import SemanticError
 
-# Variable Duplicada
-codigo_de_prueba = """
-public class Main {
+# --- TU CÓDIGO FUENTE DE PRUEBA ---
+codigo_fuente = """
+public class Test {
     public static void main(String[] args) {
-        int resultado = 10 + "hola";
-    }
-}
-"""
-"""
-# Variable No Declarada
-codigo_de_prueba = 
-public class MiClase {
-    public static void main(String[] args) {
-        int y = x; // Error aquí, 'x' no existe
-    }
-}
-"""
-"""
-
-# Incompatibilidad de Tipos
-codigo_de_prueba = 
-public class MiClase {
-    public static void main(String[] args) {
-        int z = 5 + "hola"; // Error aquí
+        int a = 5;
+        double b = (a + 10) * 2;
+        
+        if (b > 20) {
+            print(a);
+        } else {
+            print(b);
+        }
     }
 }
 """
 
-print("--- 1. FASE LÉXICA ---")
-analizador_lexico = Lexer()
-tokens = analizador_lexico.analizar(codigo_de_prueba)
-print("Tokens generados con éxito:")
-for token in tokens:
-    print(token)
-
-try:
-    print("\n--- 2. FASE SINTÁCTICA (Parsing) ---")
-    analizador_sintactico = Parser(tokens)
-    ast = analizador_sintactico.parse()
-    print("AST construido con éxito.")
-    print(json.dumps(ast, indent=2))
-
-    print("\n--- 3. FASE SEMÁNTICA ---")
-    analizador_semantico = Semantic()
-    analizador_semantico.analyze(ast)
+if __name__ == "__main__":
+    print("--- INICIANDO COMPILADOR ---")
     
-    print("\nAnálisis completado con éxito. El código es válido.")
+    try:
+        # 1. LEXER
+        print("\n--- 1. FASE LÉXICA ---")
+        lexer = Lexer()
+        tokens = lexer.analizar(codigo_fuente)
 
-except (ParsingError, SemanticError) as e:
-    print(f"\nERROR DETECTADO: {e}")
+        # 2. PARSER
+        print("\n--- 2. FASE SINTÁCTICA ---")
+        parser = Parser(tokens)
+        ast = parser.parse()
+        print("AST generado con éxito.")
+        
+        # 3. SEMÁNTICA
+        print("\n--- 3. FASE SEMÁNTICA ---")
+        semantic = SemanticStack()
+        semantic.analyze(ast)
+        print("Análisis semántico completado con éxito.")
+
+        # 4. IMPRESIÓN DE POSTFIJO COMPLETO
+        print("\n--- 4. FASE DE POSTFIJO DE INSTRUCCIONES ---")
+        
+        visitor = FullPostfixVisitor()
+        visitor.visit(ast) # Ejecuta el visitante sobre el AST
+
+    except (ParsingError, SemanticError, Exception) as e:
+        print(f"\n--- ERROR DE COMPILACIÓN ---")
+        print(e)
