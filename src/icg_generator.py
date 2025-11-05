@@ -3,12 +3,8 @@
 from src.postfix_generator import PostfixGenerator 
 
 class FullPostfixVisitor:
-    """
-    Recorre el AST y genera una cadena postfija para CADA INSTRUCCIÓN,
-    incluyendo saltos y etiquetas para el control de flujo.
-    """
+
     def __init__(self):
-        # Usamos el generador de postfijo original para las EXPRESIONES
         self.postfix_gen = PostfixGenerator()
         self.label_counter = 0
 
@@ -17,13 +13,11 @@ class FullPostfixVisitor:
         return f"L{self.label_counter - 1}"
 
     def visit(self, node):
-        """Llama al método visitante específico (ej: visit_DeclaracionVariable)"""
         method_name = f'visit_{node["tipo"]}'
         visitor = getattr(self, method_name, self.generic_visit)
         return visitor(node)
 
     def generic_visit(self, node):
-        # Por defecto, si no sabemos qué es, no hacemos nada
         return None
 
     def visit_DeclaracionClase(self, node):

@@ -47,8 +47,7 @@ class MatrizTransicion:
         }
         
         self.mapa_operadores = {
-            '+': 'MAS', '-': 'MENOS', '*': 'POR', '/': 'DIV', '%': 'MOD',
-            '(': 'PARENTESIS_IZQ', ')': 'PARENTESIS_DER', '{': 'LLAVE_IZQ', '}': 'LLAVE_DER',
+            '+': 'MAS', '-': 'MENOS', '*': 'POR', '/': 'DIV','(': 'PARENTESIS_IZQ', ')': 'PARENTESIS_DER', '{': 'LLAVE_IZQ', '}': 'LLAVE_DER',
             '[': 'CORCHETE_IZQ', ']': 'CORCHETE_DER', ';': 'PUNTOCOMA', ',': 'COMA',
         }
 

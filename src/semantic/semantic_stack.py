@@ -1,5 +1,4 @@
-# src/semantic/semantic_stack.py (CORREGIDO)
-
+# src/semantic/semantic_stack.py
 from .variable_list import VariableList
 from .semantic import SemanticError
 from src.postfix_generator import PostfixGenerator
@@ -18,18 +17,15 @@ class SemanticStack:
         }
 
     def analyze(self, ast):
-        """Punto de entrada principal."""
         if ast:
             self.visit(ast)
 
     def visit(self, node):
-        """Llama al método visitante específico."""
         method_name = f'visit_{node["tipo"]}'
         visitor = getattr(self, method_name, self.generic_visit)
         return visitor(node)
 
     def generic_visit(self, node):
-        """Visita genérica para nodos 'contenedores'."""
         for key, value in node.items():
             if isinstance(value, dict):
                 self.visit(value)
@@ -50,7 +46,7 @@ class SemanticStack:
         
         if var_type != expr_type:
             if var_type == 'double' and expr_type == 'int':
-                pass # Válido
+                pass 
             else:
                 raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
     
@@ -65,7 +61,7 @@ class SemanticStack:
         
         if variable.tipo != expr_type:
             if variable.tipo == 'double' and expr_type == 'int':
-                pass # Válido
+                pass 
             else:
                 raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{variable.tipo}' pero la expresión es '{expr_type}'.")
 
@@ -99,7 +95,6 @@ class SemanticStack:
             self.visit(statement)
 
     def _evaluate_postfix_type(self, postfix_string):
-        """Implementación de la Pila 3 (Evaluación de Tipos)."""
         stack = []
         tokens = postfix_string.split()
         
