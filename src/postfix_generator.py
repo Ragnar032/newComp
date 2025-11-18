@@ -1,25 +1,17 @@
 # src/postfix_generator.py
-
-class PostfixGenerator:
+from src.common.constants import OperatorMap
+from src.common.node_visitor import NodeVisitor
+class PostfixGenerator(NodeVisitor):
     def __init__(self):
-        self.op_map = {
-            'MAS': '+',
-            'MENOS': '-',
-            'POR': '*',
-            'DIV': '/',
-            'IGUALIGUAL': '==',
-            'DIFERENTE': '!=',
-            'MENOR': '<',
-            'MENORIGUAL': '<=',
-            'MAYOR': '>',
-            'MAYORIGUAL': '>='
-        }
+        self.op_map = OperatorMap.MAP
 
     def visit(self, node):
         method_name = f'visit_{node["tipo"]}'
         visitor = getattr(self, method_name, self.unsupported_node)
         return visitor(node)
-
+    def generic_visit(self, node):
+        raise Exception(f"No se encontró un método visit_{node['tipo']}")
+    
     def unsupported_node(self, node):
         raise Exception(f"Error de Postfix: No se puede procesar el tipo de nodo '{node.get('tipo')}'")
 

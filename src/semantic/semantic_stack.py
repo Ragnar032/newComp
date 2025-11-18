@@ -1,30 +1,23 @@
 # src/semantic/semantic_stack.py
 from .variable_list import VariableList
-from .semantic import SemanticError
+from .semantic_error import SemanticError
 from src.postfix_generator import PostfixGenerator
 from .type_rules import TYPE_RULES
-
-class SemanticStack:
+from src.common.constants import OperatorMap
+from src.common.node_visitor import NodeVisitor
+class SemanticStack(NodeVisitor):
     
     def __init__(self):
         self.variable_list = VariableList()
         self.postfix_gen = PostfixGenerator()
         self.type_rules = TYPE_RULES
-        self.op_map_reverse = {
-            '+': 'MAS', '-': 'MENOS', '*': 'POR', '/': 'DIV',
-            '==': 'IGUALIGUAL', '<': 'MENOR', '>': 'MAYOR', 
-            '<=': 'MENORIGUAL', '>=': 'MAYORIGUAL', '!=': 'DIFERENTE'
-        }
+        self.op_map_reverse = OperatorMap.REVERSE_MAP
 
     def analyze(self, ast):
         if ast:
             self.visit(ast)
 
-    def visit(self, node):
-        method_name = f'visit_{node["tipo"]}'
-        visitor = getattr(self, method_name, self.generic_visit)
-        return visitor(node)
-
+    
     def generic_visit(self, node):
         for key, value in node.items():
             if isinstance(value, dict):
@@ -33,23 +26,34 @@ class SemanticStack:
                 for item in value:
                     if isinstance(item, dict):
                         self.visit(item)
+                        
+    def _check_assignment_compatibility(self, var_type, expr_type):
+        if var_type == expr_type:
+            return True
+        if var_type == 'double' and expr_type == 'int':
+            return True
+        return False
+    def _verify_condition(self, condition_node, context_name):
+        postfix_string = self.postfix_gen.visit(condition_node)
+        cond_type = self._evaluate_postfix_type(postfix_string)
+        
+        if cond_type != 'boolean':
+            raise SemanticError(f"Error Semántico: La condición del {context_name} debe ser booleana, pero se encontró '{cond_type}'.")
 
     def visit_DeclaracionVariable(self, node):
         var_name = node['nombre']
         var_type = node['tipo_dato']
-        
+        #1. Detección de Variable Duplicada
         if not self.variable_list.add_variable(var_name, var_type):
             raise SemanticError(f"Error Semántico: La variable '{var_name}' ya ha sido declarada.")
 
         postfix_string = self.postfix_gen.visit(node['valor'])
         expr_type = self._evaluate_postfix_type(postfix_string)
         
-        if var_type != expr_type:
-            if var_type == 'double' and expr_type == 'int':
-                pass 
-            else:
-                raise SemanticError(f"Error Semántico: No se puede asignar un valor de tipo '{expr_type}' a una variable de tipo '{var_type}'.")
-    
+        if not self._check_assignment_compatibility(var_type, expr_type):
+            raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{var_type}' pero la expresión es '{expr_type}'.")
+   
+    #3. Detección de Variable No Declarada
     def visit_Asignacion(self, node):
         var_name = node['variable']
         variable = self.variable_list.find_variable(var_name)
@@ -59,23 +63,15 @@ class SemanticStack:
         postfix_string = self.postfix_gen.visit(node['valor'])
         expr_type = self._evaluate_postfix_type(postfix_string)
         
-        if variable.tipo != expr_type:
-            if variable.tipo == 'double' and expr_type == 'int':
-                pass 
-            else:
-                raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{variable.tipo}' pero la expresión es '{expr_type}'.")
-
+        if not self._check_assignment_compatibility(variable.tipo, expr_type):
+            raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{variable.tipo}' pero la expresión es '{expr_type}'.")
     def visit_LlamadaPrint(self, node):
         postfix_string = self.postfix_gen.visit(node['expresion'])
         self._evaluate_postfix_type(postfix_string)
         self.generic_visit(node)
     
     def visit_DeclaracionIf(self, node):
-        postfix_string = self.postfix_gen.visit(node['condicion'])
-        cond_type = self._evaluate_postfix_type(postfix_string)
-        
-        if cond_type != 'boolean':
-            raise SemanticError(f"Error Semántico: La condición del IF debe ser booleana, pero se encontró '{cond_type}'.")
+        self._verify_condition(node['condicion'], "IF")
             
         for statement in node['cuerpo_if']:
             self.visit(statement)
@@ -85,15 +81,12 @@ class SemanticStack:
                 self.visit(statement)
             
     def visit_DeclaracionWhile(self, node):
-        postfix_string = self.postfix_gen.visit(node['condicion'])
-        cond_type = self._evaluate_postfix_type(postfix_string)
-        
-        if cond_type != 'boolean':
-            raise SemanticError(f"Error Semántico: La condición del WHILE debe ser booleana, pero se encontró '{cond_type}'.")
+        self._verify_condition(node['condicion'], "WHILE")
         
         for statement in node['cuerpo']:
             self.visit(statement)
 
+    #2. Incompatibilidad de Tipos
     def _evaluate_postfix_type(self, postfix_string):
         stack = []
         tokens = postfix_string.split()

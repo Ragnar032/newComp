@@ -1,8 +1,8 @@
 # src/postfix_visitor.py
-
 from src.postfix_generator import PostfixGenerator 
+from src.common.node_visitor import NodeVisitor
 
-class FullPostfixVisitor:
+class FullPostfixVisitor(NodeVisitor):
     
     def __init__(self):
         self.postfix_gen = PostfixGenerator()
@@ -12,10 +12,7 @@ class FullPostfixVisitor:
         self.label_counter += 1
         return f"L{self.label_counter - 1}"
 
-    def visit(self, node):
-        method_name = f'visit_{node["tipo"]}'
-        visitor = getattr(self, method_name, self.generic_visit)
-        return visitor(node)
+
 
     def generic_visit(self, node):
         return None

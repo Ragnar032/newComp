@@ -6,7 +6,7 @@ class MatrizTransicion:
     def __init__(self):
         self.reservadas = Tokens.reservadas
         
-        # Columnas: 0=L, 1=D, 2=., 3=", 4==, 5=!, 6=<, 7=>, 8=&, 9=|, 10=/, 11=*, 12=OpA, 13=Del, 14=WS, 15=Otro
+        # Columnas: 0=L, 1=D, 2=., 3=", 4==, 5=!, 6=<, 7=>, 8=&, 9=|, 10=/, 11=*, 12=OpA(+-), 13=Del, 14=WS, 15=Otro
         self.matriz = [
           #    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
             [ 1,  2, 21, 11,  3,  4,  5,  6,  7,  8, 22, 13, 13, 14,  0, -1], # S0
@@ -47,7 +47,8 @@ class MatrizTransicion:
         }
         
         self.mapa_operadores = {
-            '+': 'MAS', '-': 'MENOS', '*': 'POR', '/': 'DIV','(': 'PARENTESIS_IZQ', ')': 'PARENTESIS_DER', '{': 'LLAVE_IZQ', '}': 'LLAVE_DER',
+            '+': 'MAS', '-': 'MENOS', '*': 'POR', '/': 'DIV',
+            '(': 'PARENTESIS_IZQ', ')': 'PARENTESIS_DER', '{': 'LLAVE_IZQ', '}': 'LLAVE_DER',
             '[': 'CORCHETE_IZQ', ']': 'CORCHETE_DER', ';': 'PUNTOCOMA', ',': 'COMA',
         }
 
@@ -64,7 +65,7 @@ class MatrizTransicion:
         if caracter == '|': return 9
         if caracter == '/': return 10
         if caracter == '*': return 11
-        if caracter in "+-%": return 12
+        if caracter in "+-": return 12         
         if caracter in "(){}[]:,;": return 13
         if caracter.isspace(): return 14
         return 15

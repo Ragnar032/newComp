@@ -5,7 +5,6 @@ from src.lexer.lexer import Lexer
 from src.parser.parser import Parser
 from src.semantic.semantic import Semantic, SemanticError
 
-# --- Función de Ayuda ---
 def run_compiler_phases(code):
     lexer = Lexer()
     tokens = lexer.analizar(code)

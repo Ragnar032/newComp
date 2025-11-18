@@ -34,7 +34,7 @@ TYPE_RULES = {
     'DIV': _division_rules,
     
     'IGUALIGUAL': _equality_rules,
-    'DIFERENTE': _equality_rules, # Asumiendo que '!=' usa las mismas reglas que '=='
+    'DIFERENTE': _equality_rules, 
     
     'MENOR': _comparison_rules,
     'MENORIGUAL': _comparison_rules,
