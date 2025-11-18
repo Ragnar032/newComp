@@ -1,0 +1,80 @@
+{
+    "tipo": "DeclaracionClase",
+    "nombre": "Test",
+    "cuerpo": [
+        {
+            "tipo": "DeclaracionMetodo",
+            "nombre": "main",
+            "tipo_retorno": "void",
+            "cuerpo": [
+                {
+                    "tipo": "DeclaracionVariable",
+                    "tipo_dato": "int",
+                    "nombre": "a",
+                    "valor": {
+                        "tipo": "LiteralNumerico",
+                        "valor": "5"
+                    }
+                },
+                {
+                    "tipo": "DeclaracionVariable",
+                    "tipo_dato": "double",
+                    "nombre": "b",
+                    "valor": {
+                        "tipo": "ExpresionBinaria",
+                        "izquierda": {
+                            "tipo": "ExpresionBinaria",
+                            "izquierda": {
+                                "tipo": "LiteralNumerico",
+                                "valor": "5"
+                            },
+                            "operador": "MAS",
+                            "derecha": {
+                                "tipo": "LiteralNumerico",
+                                "valor": "10"
+                            }
+                        },
+                        "operador": "POR",
+                        "derecha": {
+                            "tipo": "LiteralNumerico",
+                            "valor": "2"
+                        }
+                    }
+                },
+                {
+                    "tipo": "DeclaracionIf",
+                    "condicion": {
+                        "tipo": "ExpresionBinaria",
+                        "izquierda": {
+                            "tipo": "Variable",
+                            "nombre": "b"
+                        },
+                        "operador": "MAYOR",
+                        "derecha": {
+                            "tipo": "LiteralNumerico",
+                            "valor": "20"
+                        }
+                    },
+                    "cuerpo_if": [
+                        {
+                            "tipo": "LlamadaPrint",
+                            "expresion": {
+                                "tipo": "Variable",
+                                "nombre": "a"
+                            }
+                        }
+                    ],
+                    "cuerpo_else": [
+                        {
+                            "tipo": "LlamadaPrint",
+                            "expresion": {
+                                "tipo": "Variable",
+                                "nombre": "b"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

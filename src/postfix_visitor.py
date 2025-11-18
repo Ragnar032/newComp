@@ -11,9 +11,7 @@ class FullPostfixVisitor(NodeVisitor):
     def _new_label(self):
         self.label_counter += 1
         return f"L{self.label_counter - 1}"
-
-
-
+    
     def generic_visit(self, node):
         return None
 

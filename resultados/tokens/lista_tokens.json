@@ -1,0 +1,272 @@
+[
+    {
+        "tipo": "PUBLIC",
+        "valor": "public",
+        "linea": 2
+    },
+    {
+        "tipo": "CLASS",
+        "valor": "class",
+        "linea": 2
+    },
+    {
+        "tipo": "ID",
+        "valor": "Test",
+        "linea": 2
+    },
+    {
+        "tipo": "LLAVE_IZQ",
+        "valor": "{",
+        "linea": 2
+    },
+    {
+        "tipo": "PUBLIC",
+        "valor": "public",
+        "linea": 3
+    },
+    {
+        "tipo": "STATIC",
+        "valor": "static",
+        "linea": 3
+    },
+    {
+        "tipo": "VOID",
+        "valor": "void",
+        "linea": 3
+    },
+    {
+        "tipo": "MAIN",
+        "valor": "main",
+        "linea": 3
+    },
+    {
+        "tipo": "PARENTESIS_IZQ",
+        "valor": "(",
+        "linea": 3
+    },
+    {
+        "tipo": "STRINGTYPE",
+        "valor": "String",
+        "linea": 3
+    },
+    {
+        "tipo": "CORCHETE_IZQ",
+        "valor": "[",
+        "linea": 3
+    },
+    {
+        "tipo": "CORCHETE_DER",
+        "valor": "]",
+        "linea": 3
+    },
+    {
+        "tipo": "ID",
+        "valor": "args",
+        "linea": 3
+    },
+    {
+        "tipo": "PARENTESIS_DER",
+        "valor": ")",
+        "linea": 3
+    },
+    {
+        "tipo": "LLAVE_IZQ",
+        "valor": "{",
+        "linea": 3
+    },
+    {
+        "tipo": "INT",
+        "valor": "int",
+        "linea": 4
+    },
+    {
+        "tipo": "ID",
+        "valor": "a",
+        "linea": 4
+    },
+    {
+        "tipo": "IGUAL",
+        "valor": "=",
+        "linea": 4
+    },
+    {
+        "tipo": "NUMBER",
+        "valor": "5",
+        "linea": 4
+    },
+    {
+        "tipo": "PUNTOCOMA",
+        "valor": ";",
+        "linea": 4
+    },
+    {
+        "tipo": "DOUBLE",
+        "valor": "double",
+        "linea": 6
+    },
+    {
+        "tipo": "ID",
+        "valor": "b",
+        "linea": 6
+    },
+    {
+        "tipo": "IGUAL",
+        "valor": "=",
+        "linea": 6
+    },
+    {
+        "tipo": "PARENTESIS_IZQ",
+        "valor": "(",
+        "linea": 6
+    },
+    {
+        "tipo": "NUMBER",
+        "valor": "5",
+        "linea": 6
+    },
+    {
+        "tipo": "MAS",
+        "valor": "+",
+        "linea": 6
+    },
+    {
+        "tipo": "NUMBER",
+        "valor": "10",
+        "linea": 6
+    },
+    {
+        "tipo": "PARENTESIS_DER",
+        "valor": ")",
+        "linea": 6
+    },
+    {
+        "tipo": "POR",
+        "valor": "*",
+        "linea": 6
+    },
+    {
+        "tipo": "NUMBER",
+        "valor": "2",
+        "linea": 6
+    },
+    {
+        "tipo": "PUNTOCOMA",
+        "valor": ";",
+        "linea": 6
+    },
+    {
+        "tipo": "IF",
+        "valor": "if",
+        "linea": 8
+    },
+    {
+        "tipo": "PARENTESIS_IZQ",
+        "valor": "(",
+        "linea": 8
+    },
+    {
+        "tipo": "ID",
+        "valor": "b",
+        "linea": 8
+    },
+    {
+        "tipo": "MAYOR",
+        "valor": ">",
+        "linea": 8
+    },
+    {
+        "tipo": "NUMBER",
+        "valor": "20",
+        "linea": 8
+    },
+    {
+        "tipo": "PARENTESIS_DER",
+        "valor": ")",
+        "linea": 8
+    },
+    {
+        "tipo": "LLAVE_IZQ",
+        "valor": "{",
+        "linea": 8
+    },
+    {
+        "tipo": "PRINT",
+        "valor": "print",
+        "linea": 9
+    },
+    {
+        "tipo": "PARENTESIS_IZQ",
+        "valor": "(",
+        "linea": 9
+    },
+    {
+        "tipo": "ID",
+        "valor": "a",
+        "linea": 9
+    },
+    {
+        "tipo": "PARENTESIS_DER",
+        "valor": ")",
+        "linea": 9
+    },
+    {
+        "tipo": "PUNTOCOMA",
+        "valor": ";",
+        "linea": 9
+    },
+    {
+        "tipo": "LLAVE_DER",
+        "valor": "}",
+        "linea": 10
+    },
+    {
+        "tipo": "ELSE",
+        "valor": "else",
+        "linea": 10
+    },
+    {
+        "tipo": "LLAVE_IZQ",
+        "valor": "{",
+        "linea": 10
+    },
+    {
+        "tipo": "PRINT",
+        "valor": "print",
+        "linea": 11
+    },
+    {
+        "tipo": "PARENTESIS_IZQ",
+        "valor": "(",
+        "linea": 11
+    },
+    {
+        "tipo": "ID",
+        "valor": "b",
+        "linea": 11
+    },
+    {
+        "tipo": "PARENTESIS_DER",
+        "valor": ")",
+        "linea": 11
+    },
+    {
+        "tipo": "PUNTOCOMA",
+        "valor": ";",
+        "linea": 11
+    },
+    {
+        "tipo": "LLAVE_DER",
+        "valor": "}",
+        "linea": 12
+    },
+    {
+        "tipo": "LLAVE_DER",
+        "valor": "}",
+        "linea": 13
+    },
+    {
+        "tipo": "LLAVE_DER",
+        "valor": "}",
+        "linea": 14
+    }
+]
