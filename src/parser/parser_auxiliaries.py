@@ -21,7 +21,7 @@ class ParserAuxiliaries:
             if peek_pos < len(self.tokens):
                 return self.tokens[peek_pos]
             else:
-                # Si no hay más tokens, devuelve EOF para evitar errores
+                
                 return {'tipo': 'EOF', 'valor': None}
         
     def eat(self, token_type):
