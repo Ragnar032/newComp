@@ -1,6 +1,6 @@
 {
     "tipo": "DeclaracionClase",
-    "nombre": "Test",
+    "nombre": "Demo",
     "cuerpo": [
         {
             "tipo": "DeclaracionMetodo",
@@ -13,16 +13,14 @@
                     "nombre": "a",
                     "valor": {
                         "tipo": "LiteralNumerico",
-                        "valor": "5"
+                        "valor": "20"
                     }
                 },
                 {
-                    "tipo": "DeclaracionVariable",
-                    "tipo_dato": "double",
-                    "nombre": "b",
-                    "valor": {
-                        "tipo": "LiteralNumerico",
-                        "valor": "30"
+                    "tipo": "LlamadaPrint",
+                    "expresion": {
+                        "tipo": "Variable",
+                        "nombre": "a"
                     }
                 },
                 {
@@ -31,20 +29,20 @@
                         "tipo": "ExpresionBinaria",
                         "izquierda": {
                             "tipo": "Variable",
-                            "nombre": "b"
+                            "nombre": "a"
                         },
                         "operador": "MAYOR",
                         "derecha": {
                             "tipo": "LiteralNumerico",
-                            "valor": "20"
+                            "valor": "15"
                         }
                     },
                     "cuerpo_if": [
                         {
                             "tipo": "LlamadaPrint",
                             "expresion": {
-                                "tipo": "Variable",
-                                "nombre": "a"
+                                "tipo": "LiteralCadena",
+                                "valor": "Es Mayor"
                             }
                         }
                     ],
@@ -52,8 +50,57 @@
                         {
                             "tipo": "LlamadaPrint",
                             "expresion": {
+                                "tipo": "LiteralCadena",
+                                "valor": "Es Menor"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "tipo": "DeclaracionVariable",
+                    "tipo_dato": "int",
+                    "nombre": "cont",
+                    "valor": {
+                        "tipo": "LiteralNumerico",
+                        "valor": "3"
+                    }
+                },
+                {
+                    "tipo": "DeclaracionWhile",
+                    "condicion": {
+                        "tipo": "ExpresionBinaria",
+                        "izquierda": {
+                            "tipo": "Variable",
+                            "nombre": "cont"
+                        },
+                        "operador": "MAYOR",
+                        "derecha": {
+                            "tipo": "LiteralNumerico",
+                            "valor": "0"
+                        }
+                    },
+                    "cuerpo": [
+                        {
+                            "tipo": "LlamadaPrint",
+                            "expresion": {
                                 "tipo": "Variable",
-                                "nombre": "b"
+                                "nombre": "cont"
+                            }
+                        },
+                        {
+                            "tipo": "Asignacion",
+                            "variable": "cont",
+                            "valor": {
+                                "tipo": "ExpresionBinaria",
+                                "izquierda": {
+                                    "tipo": "Variable",
+                                    "nombre": "cont"
+                                },
+                                "operador": "MENOS",
+                                "derecha": {
+                                    "tipo": "LiteralNumerico",
+                                    "valor": "1"
+                                }
                             }
                         }
                     ]

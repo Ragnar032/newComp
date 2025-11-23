@@ -5,6 +5,7 @@ from src.postfix_generator import PostfixGenerator
 from .type_rules import TYPE_RULES
 from src.common.constants import OperatorMap
 from src.common.node_visitor import NodeVisitor
+
 class SemanticStack(NodeVisitor):
     
     def __init__(self):
@@ -16,7 +17,6 @@ class SemanticStack(NodeVisitor):
     def analyze(self, ast):
         if ast:
             self.visit(ast)
-
     
     def generic_visit(self, node):
         for key, value in node.items():
@@ -26,13 +26,42 @@ class SemanticStack(NodeVisitor):
                 for item in value:
                     if isinstance(item, dict):
                         self.visit(item)
-                        
+
+    # --- NUEVA FUNCIÓN: TOKENIZADOR INTELIGENTE ---
+    def _smart_split(self, text):
+        """
+        Divide el texto por espacios, PERO respeta lo que esté entre comillas.
+        Ejemplo: 'print "Hola Mundo"' -> ['print', '"Hola Mundo"']
+        """
+        tokens = []
+        token_actual = ""
+        dentro_comillas = False
+        
+        for char in text:
+            if char == '"':
+                dentro_comillas = not dentro_comillas # Entramos o salimos de comillas
+                token_actual += char
+            elif char == ' ' and not dentro_comillas:
+                # Si encontramos un espacio y NO estamos en comillas, cortamos el token
+                if token_actual:
+                    tokens.append(token_actual)
+                    token_actual = ""
+            else:
+                token_actual += char
+        
+        if token_actual:
+            tokens.append(token_actual)
+            
+        return tokens
+    # -----------------------------------------------
+
     def _check_assignment_compatibility(self, var_type, expr_type):
         if var_type == expr_type:
             return True
         if var_type == 'double' and expr_type == 'int':
             return True
         return False
+
     def _verify_condition(self, condition_node, context_name):
         postfix_string = self.postfix_gen.visit(condition_node)
         cond_type = self._evaluate_postfix_type(postfix_string)
@@ -43,7 +72,7 @@ class SemanticStack(NodeVisitor):
     def visit_DeclaracionVariable(self, node):
         var_name = node['nombre']
         var_type = node['tipo_dato']
-        #1. Detección de Variable Duplicada
+        
         if not self.variable_list.add_variable(var_name, var_type):
             raise SemanticError(f"Error Semántico: La variable '{var_name}' ya ha sido declarada.")
 
@@ -53,7 +82,6 @@ class SemanticStack(NodeVisitor):
         if not self._check_assignment_compatibility(var_type, expr_type):
             raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{var_type}' pero la expresión es '{expr_type}'.")
    
-    #3. Detección de Variable No Declarada
     def visit_Asignacion(self, node):
         var_name = node['variable']
         variable = self.variable_list.find_variable(var_name)
@@ -65,31 +93,31 @@ class SemanticStack(NodeVisitor):
         
         if not self._check_assignment_compatibility(variable.tipo, expr_type):
             raise SemanticError(f"Error Semántico: Asignación inválida. Variable '{var_name}' es '{variable.tipo}' pero la expresión es '{expr_type}'.")
+
     def visit_LlamadaPrint(self, node):
         postfix_string = self.postfix_gen.visit(node['expresion'])
         self._evaluate_postfix_type(postfix_string)
-        self.generic_visit(node)
+        # No llamamos a generic_visit aquí para evitar recursión innecesaria en la expresión ya visitada
     
     def visit_DeclaracionIf(self, node):
         self._verify_condition(node['condicion'], "IF")
-            
         for statement in node['cuerpo_if']:
             self.visit(statement)
-            
         if node['cuerpo_else']:
             for statement in node['cuerpo_else']:
                 self.visit(statement)
             
     def visit_DeclaracionWhile(self, node):
         self._verify_condition(node['condicion'], "WHILE")
-        
         for statement in node['cuerpo']:
             self.visit(statement)
 
-    #2. Incompatibilidad de Tipos
     def _evaluate_postfix_type(self, postfix_string):
         stack = []
-        tokens = postfix_string.split()
+        
+        # --- AQUÍ USAMOS EL NUEVO MÉTODO EN VEZ DE .split() ---
+        tokens = self._smart_split(postfix_string)
+        # ------------------------------------------------------
         
         for token in tokens:
             if token in self.op_map_reverse:
@@ -107,6 +135,7 @@ class SemanticStack(NodeVisitor):
                 stack.append(result_type)
                 
             else:
+                # Ahora token será '"Es Mayor"' completo, así que entrará en este IF correctamente
                 if token.startswith('"') and token.endswith('"'):
                     stack.append('String')
                 elif token == 'true' or token == 'false':

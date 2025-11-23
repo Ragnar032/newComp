@@ -24,21 +24,14 @@ def guardar_json(data, carpeta, nombre_archivo):
     except Exception as e:
         print(f"   [ERROR] No se pudo guardar el archivo {nombre_archivo}: {e}")
 
-codigo_fuente = """
-public class Test {
-    public static void main(String[] args) {
-        int a = 5;
-        // Operación constante: (5 + 10) * 2 debe convertirse en 30.0
-        double b = (5 + 10) * 2; 
-        
-        if (b > 20) {
-            print(a);
-        } else {
-            print(b);
-        }
-    }
-}
-"""
+RUTA_CODIGO_FUENTE = "source.txt"
+try:
+    with open(RUTA_CODIGO_FUENTE, 'r', encoding='utf-8') as f:
+        codigo_fuente = f.read()
+    print(f"--- Archivo '{RUTA_CODIGO_FUENTE}' cargado exitosamente. ---")
+except FileNotFoundError:
+    print(f"--- ERROR: El archivo '{RUTA_CODIGO_FUENTE}' no se encontró. ---")
+    sys.exit(1)
 
 if __name__ == "__main__":
     print("--- INICIANDO COMPILADOR ---")
