@@ -1,0 +1,14 @@
+[
+    {
+        "op": "=",
+        "arg1": "20",
+        "arg2": null,
+        "res": "a"
+    },
+    {
+        "op": "PRINT",
+        "arg1": "a",
+        "arg2": null,
+        "res": null
+    }
+]

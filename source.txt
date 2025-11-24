@@ -2,17 +2,5 @@ public class Demo {
     public static void main(String[] args) {
         int a = 5 * 2 + 10; // El optimizador lo convertirá a 20
         print(a);
-        
-        if (a > 15) {
-            print("Es Mayor");
-        } else {
-            print("Es Menor");
-        }
-        
-        int cont = 3;
-        while (cont > 0) {
-            print(cont);
-            cont = cont - 1;
-        }
     }
 }

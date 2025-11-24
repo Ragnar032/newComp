@@ -13,24 +13,25 @@ class FullPostfixVisitor(NodeVisitor):
         return f"L{self.label_counter - 1}"
     
     def generic_visit(self, node):
-        return None
+        return "" # Importante: devuelve cadena vacía en lugar de None
 
     def visit_DeclaracionClase(self, node):
-        print(f"CLASS: {node['nombre']}")
-        print("="*30)
+        # Acumulamos todo el código de los métodos en esta variable
+        full_code = ""
         for member in node['cuerpo']:
-            self.visit(member)
-        print("="*30)
-        return None
+            res = self.visit(member)
+            if res:
+                full_code += res + "\n"
+        return full_code
 
     def visit_DeclaracionMetodo(self, node):
-        print(f"\nMETHOD: {node['nombre']}():")
-        print("---")
+        # Acumulamos las instrucciones del método
+        method_code = ""
         for statement in node['cuerpo']:
-            postfix_instruction = self.visit(statement)
-            if postfix_instruction:
-                print(postfix_instruction)
-        return None
+            stmt_code = self.visit(statement)
+            if stmt_code:
+                method_code += stmt_code + "\n"
+        return method_code
 
     def visit_DeclaracionVariable(self, node):
         var_name = node['nombre']
@@ -53,12 +54,14 @@ class FullPostfixVisitor(NodeVisitor):
         
         body_if_str = ""
         for stmt in node['cuerpo_if']:
-            body_if_str += f"\n\t{self.visit(stmt)}"
+            res = self.visit(stmt)
+            if res: body_if_str += f"\n\t{res}"
         
         if node['cuerpo_else']:
             body_else_str = ""
             for stmt in node['cuerpo_else']:
-                body_else_str += f"\n\t{self.visit(stmt)}"
+                res = self.visit(stmt)
+                if res: body_else_str += f"\n\t{res}"
             
             return (
                 f"{cond_postfix} {label_else} JUMP_IF_FALSE"
@@ -82,7 +85,8 @@ class FullPostfixVisitor(NodeVisitor):
         
         body_str = ""
         for stmt in node['cuerpo']:
-            body_str += f"\n\t{self.visit(stmt)}"
+            res = self.visit(stmt)
+            if res: body_str += f"\n\t{res}"
         
         return (
             f"{label_inicio}:\n"
