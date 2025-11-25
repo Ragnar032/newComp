@@ -27,7 +27,6 @@ class SemanticStack(NodeVisitor):
                     if isinstance(item, dict):
                         self.visit(item)
 
-    # --- NUEVA FUNCIÓN: TOKENIZADOR INTELIGENTE ---
     def _smart_split(self, text):
         """
         Divide el texto por espacios, PERO respeta lo que esté entre comillas.
@@ -97,7 +96,6 @@ class SemanticStack(NodeVisitor):
     def visit_LlamadaPrint(self, node):
         postfix_string = self.postfix_gen.visit(node['expresion'])
         self._evaluate_postfix_type(postfix_string)
-        # No llamamos a generic_visit aquí para evitar recursión innecesaria en la expresión ya visitada
     
     def visit_DeclaracionIf(self, node):
         self._verify_condition(node['condicion'], "IF")

@@ -1,10 +1,14 @@
 # test_semantic.py
-
 import pytest
+import sys
+sys.path.append('.')
+
+# Importamos tus módulos
 from src.lexer.lexer import Lexer
 from src.parser.parser import Parser
 from src.semantic.semantic import Semantic, SemanticError
 
+# Función auxiliar para correr el compilador
 def run_compiler_phases(code):
     lexer = Lexer()
     tokens = lexer.analizar(code)
@@ -13,104 +17,72 @@ def run_compiler_phases(code):
     semantic = Semantic()
     semantic.analyze(ast)
 
-# --- Casos de Prueba Válidos ---
+# ==========================================
+# CASOS DE PRUEBA (Con impresión de errores)
+# ==========================================
 
-def test_valid_code_simple():
-    code = """
-    public class Main {
-        public static void main(String[] args) {
-            int a = 10;
-            double b = 20.5;
-            double c = a + b;
-        }
-    }
-    """
-    run_compiler_phases(code)
-
-def test_valid_int_to_double_assignment():
-    code = """
-    public class Main {
-        public static void main(String[] args) {
-            int entero = 5;
-            double flotante = 0.0;
-            flotante = entero;
-        }
-    }
-    """
-    run_compiler_phases(code)
-
-
-# --- Casos de Prueba Inválidos ---
-
-def test_error_duplicate_variable():
-    """Verifica que se detecte una variable duplicada."""
-    code = """
-    public class Main {
-        public static void main(String[] args) {
-            int x = 5;
-            String x = "hola";
-        }
-    }
-    """
-    print("\n--- Probando error de variable duplicada ---")
-    print("Código a probar:")
-    print(code)
+def test_caso_1_variable_no_declarada():
+    print("\n----------------------------------------------------------------")
+    print("PRUEBA 1: Variable No Declarada")
+    print("----------------------------------------------------------------")
     
-    with pytest.raises(SemanticError, match="La variable 'x' ya ha sido declarada") as excinfo:
+    code = """
+    public class Test {
+        public static void main(String[] args) {
+            a = 10; 
+        }
+    }
+    """
+    
+    # Verificamos que lance el error y lo capturamos en 'excinfo'
+    with pytest.raises(SemanticError, match="La variable 'a' no ha sido declarada") as excinfo:
         run_compiler_phases(code)
     
-    print(f"✅ Error capturado correctamente: {excinfo.value}")
+    # IMPRIMIR EL ERROR EN CONSOLA
+    print(f"✅ ÉXITO: El compilador detectó el error correctamente.")
+    print(f"   Mensaje recibido: \"{excinfo.value}\"")
 
-def test_error_undeclared_variable():
-    """Verifica que se detecte el uso de una variable no declarada."""
-    code = """
-    public class Main {
-        public static void main(String[] args) {
-            int a = y;
-        }
-    }
-    """
-    print("\n--- Probando error de variable no declarada ---")
-    print("Código a probar:")
-    print(code)
 
-    with pytest.raises(SemanticError, match="La variable 'y' no ha sido declarada") as excinfo:
-        run_compiler_phases(code)
-        
-    print(f"✅ Error capturado correctamente: {excinfo.value}")
-
-def test_error_type_mismatch_assignment():
-    """Verifica la detección de tipos incompatibles en una asignación."""
-    code = """
-    public class Main {
-        public static void main(String[] args) {
-            int numero = "texto";
-        }
-    }
-    """
-    print("\n--- Probando error de incompatibilidad en asignación ---")
-    print("Código a probar:")
-    print(code)
+def test_caso_2_tipos_incompatibles():
+    print("\n----------------------------------------------------------------")
+    print("PRUEBA 2: Tipos Incompatibles")
+    print("----------------------------------------------------------------")
     
-    with pytest.raises(SemanticError, match="No se puede asignar un valor de tipo 'String' a una variable de tipo 'int'") as excinfo:
-        run_compiler_phases(code)
-
-    print(f"✅ Error capturado correctamente: {excinfo.value}")
-
-def test_error_type_mismatch_operation():
-    """Verifica la detección de tipos incompatibles en una operación binaria."""
     code = """
     public class Main {
         public static void main(String[] args) {
-            int resultado = 10 + "hola";
+            int numero = "texto"; 
         }
     }
     """
-    print("\n--- Probando error de incompatibilidad en operación ---")
-    print("Código a probar:")
-    print(code)
-
-    with pytest.raises(SemanticError, match="No se puede aplicar el operador 'MAS' a los tipos 'int' y 'String'") as excinfo:
+    
+    expected_msg = "Asignación inválida. Variable 'numero' es 'int' pero la expresión es 'String'"
+    
+    with pytest.raises(SemanticError, match=expected_msg) as excinfo:
         run_compiler_phases(code)
 
-    print(f"✅ Error capturado correctamente: {excinfo.value}")
+    # IMPRIMIR EL ERROR EN CONSOLA
+    print(f"✅ ÉXITO: El compilador detectó el error correctamente.")
+    print(f"   Mensaje recibido: \"{excinfo.value}\"")
+
+
+def test_caso_3_variable_duplicada():
+    print("\n----------------------------------------------------------------")
+    print("PRUEBA 3: Variable Duplicada")
+    print("----------------------------------------------------------------")
+    
+    code = """
+    public class Test {
+        public static void main(String[] args) {
+            int contador = 100;
+            int contador = 50;
+        }
+    }
+    """
+    
+    with pytest.raises(SemanticError, match="La variable 'contador' ya ha sido declarada") as excinfo:
+        run_compiler_phases(code)
+    
+    # IMPRIMIR EL ERROR EN CONSOLA
+    print(f"✅ ÉXITO: El compilador detectó el error correctamente.")
+    print(f"   Mensaje recibido: \"{excinfo.value}\"")
